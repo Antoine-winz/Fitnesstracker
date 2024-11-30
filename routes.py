@@ -26,8 +26,7 @@ def view_workout(workout_id):
     return render_template('view_workout.html', workout=workout)
 
 @app.route('/workout/<int:workout_id>/exercise', methods=['POST'])
-def add_exercise():
-    workout_id = request.form.get('workout_id')
+def add_exercise(workout_id):
     exercise_name = request.form.get('exercise_name')
     
     exercise = Exercise(name=exercise_name, workout_id=workout_id)
