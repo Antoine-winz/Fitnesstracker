@@ -36,8 +36,7 @@ def add_exercise(workout_id):
     return jsonify({'exercise_id': exercise.id})
 
 @app.route('/exercise/<int:exercise_id>/set', methods=['POST'])
-def add_set():
-    exercise_id = request.form.get('exercise_id')
+def add_set(exercise_id):
     reps = request.form.get('reps')
     weight = request.form.get('weight')
     
