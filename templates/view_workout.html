@@ -1,0 +1,69 @@
+{% extends "base.html" %}
+
+{% block content %}
+<h2>{{ workout.name }}</h2>
+<p class="text-muted">{{ workout.date.strftime('%Y-%m-%d %H:%M') }}</p>
+
+<div class="mb-4">
+    <button class="btn btn-primary" id="addExerciseBtn">Add Exercise</button>
+</div>
+
+<div id="exercises">
+    {% for exercise in workout.exercises %}
+    <div class="card mb-3">
+        <div class="card-header">
+            <h5 class="card-title mb-0">{{ exercise.name }}</h5>
+        </div>
+        <div class="card-body">
+            <div class="sets-container">
+                {% for set in exercise.sets %}
+                <div class="set-row">
+                    <span class="set-number">Set {{ loop.index }}:</span>
+                    <span class="set-details">{{ set.reps }} reps @ {{ set.weight }}kg</span>
+                </div>
+                {% endfor %}
+            </div>
+            <button class="btn btn-secondary btn-sm mt-2 add-set-btn" 
+                    data-exercise-id="{{ exercise.id }}">Add Set</button>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+
+<div class="modal fade" id="exerciseModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Add Exercise</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <input type="text" class="form-control" id="exerciseName" placeholder="Exercise name">
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                <button type="button" class="btn btn-primary" id="saveExercise">Save</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="setModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Add Set</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <input type="number" class="form-control mb-2" id="reps" placeholder="Number of reps">
+                <input type="number" class="form-control" id="weight" placeholder="Weight (kg)">
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                <button type="button" class="btn btn-primary" id="saveSet">Save</button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

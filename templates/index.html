@@ -1,0 +1,12 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="text-center py-5">
+    <h1 class="display-4">Welcome to Workout Tracker</h1>
+    <p class="lead">Track your workouts, sets, reps, and progress</p>
+    <div class="mt-4">
+        <a href="{{ url_for('add_workout') }}" class="btn btn-primary btn-lg">Start New Workout</a>
+        <a href="{{ url_for('history') }}" class="btn btn-secondary btn-lg ms-2">View History</a>
+    </div>
+</div>
+{% endblock %}

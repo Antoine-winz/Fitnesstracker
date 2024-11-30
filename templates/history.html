@@ -1,0 +1,41 @@
+{% extends "base.html" %}
+
+{% block content %}
+<h2 class="mb-4">Workout History</h2>
+
+<div class="row">
+    <div class="col-md-12">
+        {% for workout in workouts %}
+        <div class="card mb-3">
+            <div class="card-header">
+                <div class="d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0">{{ workout.name }}</h5>
+                    <small class="text-muted">{{ workout.date.strftime('%Y-%m-%d %H:%M') }}</small>
+                </div>
+            </div>
+            <div class="card-body">
+                {% if workout.notes %}
+                <p class="card-text">{{ workout.notes }}</p>
+                {% endif %}
+                <div class="exercise-summary">
+                    {% for exercise in workout.exercises %}
+                    <div class="exercise-item">
+                        <strong>{{ exercise.name }}</strong>
+                        <ul class="list-unstyled ms-3">
+                            {% for set in exercise.sets %}
+                            <li>Set {{ loop.index }}: {{ set.reps }} reps @ {{ set.weight }}kg</li>
+                            {% endfor %}
+                        </ul>
+                    </div>
+                    {% endfor %}
+                </div>
+                <a href="{{ url_for('view_workout', workout_id=workout.id) }}" 
+                   class="btn btn-outline-primary btn-sm">View Details</a>
+            </div>
+        </div>
+        {% else %}
+        <div class="alert alert-info">No workouts recorded yet.</div>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}
