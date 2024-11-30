@@ -19,7 +19,7 @@
                 {% for set in exercise.sets %}
                 <div class="set-row">
                     <span class="set-number">Set {{ loop.index }}:</span>
-                    <span class="set-details">{{ set.reps }} reps @ {{ set.weight }}kg</span>
+                    <span class="set-details">{{ set.reps }} reps - {{ set.weight }}kg</span>
                 </div>
                 {% endfor %}
             </div>

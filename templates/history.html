@@ -23,7 +23,7 @@
                         <strong>{{ exercise.name }}</strong>
                         <ul class="list-unstyled ms-3">
                             {% for set in exercise.sets %}
-                            <li>Set {{ loop.index }}: {{ set.reps }} reps @ {{ set.weight }}kg</li>
+                            <li>Set {{ loop.index }}: {{ set.reps }} reps - {{ set.weight }}kg</li>
                             {% endfor %}
                         </ul>
                     </div>
