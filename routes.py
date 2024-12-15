@@ -89,18 +89,29 @@ def duplicate_workout(workout_id):
         # Create a new workout with the same name (add "Copy" suffix)
         new_workout = Workout(
             name=f"{original_workout.name} (Copy)",
-            notes=original_workout.notes
+            notes=original_workout.notes,
+            date=datetime.utcnow()  # Set current time for the new workout
         )
         db.session.add(new_workout)
         db.session.flush()  # Get the new workout ID
         
-        # Duplicate all exercises
+        # Duplicate all exercises and their sets
         for orig_exercise in original_workout.exercises:
             new_exercise = Exercise(
                 name=orig_exercise.name,
                 workout_id=new_workout.id
             )
             db.session.add(new_exercise)
+            db.session.flush()  # Get the new exercise ID
+            
+            # Duplicate all sets for this exercise
+            for orig_set in orig_exercise.sets:
+                new_set = Set(
+                    reps=orig_set.reps,
+                    weight=orig_set.weight,
+                    exercise_id=new_exercise.id
+                )
+                db.session.add(new_set)
         
         db.session.commit()
         return jsonify({
@@ -110,6 +121,7 @@ def duplicate_workout(workout_id):
         })
     except Exception as e:
         db.session.rollback()
+        app.logger.error(f'Error duplicating workout: {str(e)}')
         return jsonify({
             'success': False,
             'error': str(e)

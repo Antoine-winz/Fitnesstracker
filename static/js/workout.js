@@ -171,23 +171,43 @@ document.addEventListener('DOMContentLoaded', function() {
     document.querySelectorAll('.duplicate-workout').forEach(btn => {
         btn.addEventListener('click', async function(e) {
             e.preventDefault();
+            
+            // Prevent double-clicking
+            if (this.disabled) return;
+            
             const workoutId = this.dataset.workoutId;
+            const originalText = this.innerHTML;
             
             try {
+                // Disable button and show loading state
+                this.disabled = true;
+                this.innerHTML = '<i class="bi bi-hourglass"></i> Duplicating...';
+                
                 const response = await fetch(`/workout/${workoutId}/duplicate`, {
                     method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    }
                 });
+                
                 const data = await response.json();
                 
                 if (data.success) {
                     toastr.success('Workout duplicated successfully');
+                    // Redirect to the new workout
                     window.location.href = `/workout/${data.workout_id}`;
                 } else {
                     toastr.error(data.error || 'Failed to duplicate workout');
+                    // Reset button state
+                    this.disabled = false;
+                    this.innerHTML = originalText;
                 }
             } catch (error) {
+                console.error('Error duplicating workout:', error);
                 toastr.error('Error duplicating workout');
-                console.error('Error:', error);
+                // Reset button state
+                this.disabled = false;
+                this.innerHTML = originalText;
             }
         });
     });
