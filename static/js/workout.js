@@ -169,6 +169,61 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     });
 
+
+    // Delete Workout Handler
+    document.querySelectorAll('.delete-workout').forEach(btn => {
+        btn.addEventListener('click', async function(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            
+            if (!confirm('Are you sure you want to delete this workout?')) {
+                return;
+            }
+            
+            const workoutId = this.dataset.workoutId;
+            if (!workoutId) {
+                console.error('No workout ID found');
+                return;
+            }
+            
+            // Store original button state
+            const originalText = this.innerHTML;
+            
+            try {
+                this.disabled = true;
+                this.innerHTML = '<i class="bi bi-hourglass"></i> Deleting...';
+                
+                const response = await fetch(`/workout/${workoutId}/delete`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
+                });
+                
+                const data = await response.json();
+                
+                if (!response.ok) {
+                    console.error('Server error:', data.error);
+                    throw new Error(data.error || 'Failed to delete workout');
+                }
+                
+                console.log('Workout deleted successfully');
+                // Remove the workout element from the DOM or redirect to history page
+                const workoutElement = this.closest('.workout-card');
+                if (workoutElement) {
+                    workoutElement.remove();
+                } else {
+                    window.location.href = '/history';
+                }
+                
+            } catch (error) {
+                console.error('Deletion error:', error);
+                this.disabled = false;
+                this.innerHTML = originalText;
+            }
+        });
+    });
+
     // Duplicate Workout Handler
     document.querySelectorAll('.duplicate-workout').forEach(btn => {
         btn.addEventListener('click', async function(e) {

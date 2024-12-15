@@ -132,6 +132,20 @@ def duplicate_workout(workout_id):
         app.logger.error(error_msg)
         return jsonify({'error': str(e)}), 500
 
+@app.route('/workout/<int:workout_id>/delete', methods=['POST'])
+def delete_workout(workout_id):
+    try:
+        workout = Workout.query.get_or_404(workout_id)
+        db.session.delete(workout)
+        db.session.commit()
+        app.logger.info(f'Successfully deleted workout {workout_id}')
+        return jsonify({'message': 'Workout deleted successfully'})
+    except Exception as e:
+        db.session.rollback()
+        error_msg = f'Error deleting workout {workout_id}: {str(e)}'
+        app.logger.error(error_msg)
+        return jsonify({'error': str(e)}), 500
+
 @app.route('/history')
 def history():
     workouts = Workout.query.order_by(Workout.date.desc()).all()
