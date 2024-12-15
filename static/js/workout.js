@@ -166,4 +166,29 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         });
     });
+
+    // Duplicate Workout Handler
+    document.querySelectorAll('.duplicate-workout').forEach(btn => {
+        btn.addEventListener('click', async function(e) {
+            e.preventDefault();
+            const workoutId = this.dataset.workoutId;
+            
+            try {
+                const response = await fetch(`/workout/${workoutId}/duplicate`, {
+                    method: 'POST',
+                });
+                const data = await response.json();
+                
+                if (data.success) {
+                    toastr.success('Workout duplicated successfully');
+                    window.location.href = `/workout/${data.workout_id}`;
+                } else {
+                    toastr.error(data.error || 'Failed to duplicate workout');
+                }
+            } catch (error) {
+                toastr.error('Error duplicating workout');
+                console.error('Error:', error);
+            }
+        });
+    });
 });

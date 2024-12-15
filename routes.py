@@ -80,6 +80,41 @@ def add_set(exercise_id):
     
     return jsonify({'success': True})
 
+@app.route('/workout/<int:workout_id>/duplicate', methods=['POST'])
+def duplicate_workout(workout_id):
+    try:
+        # Get the original workout
+        original_workout = Workout.query.get_or_404(workout_id)
+        
+        # Create a new workout with the same name (add "Copy" suffix)
+        new_workout = Workout(
+            name=f"{original_workout.name} (Copy)",
+            notes=original_workout.notes
+        )
+        db.session.add(new_workout)
+        db.session.flush()  # Get the new workout ID
+        
+        # Duplicate all exercises
+        for orig_exercise in original_workout.exercises:
+            new_exercise = Exercise(
+                name=orig_exercise.name,
+                workout_id=new_workout.id
+            )
+            db.session.add(new_exercise)
+        
+        db.session.commit()
+        return jsonify({
+            'success': True,
+            'workout_id': new_workout.id,
+            'message': 'Workout duplicated successfully'
+        })
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({
+            'success': False,
+            'error': str(e)
+        }), 500
+
 @app.route('/history')
 def history():
     workouts = Workout.query.order_by(Workout.date.desc()).all()
