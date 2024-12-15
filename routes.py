@@ -27,16 +27,20 @@ def view_workout(workout_id):
 
 @app.route('/workout/<int:workout_id>/exercise', methods=['POST'])
 def add_exercise(workout_id):
+    if not request.form:
+        return jsonify({'error': 'No form data received'}), 400
+        
+    exercise_name = request.form.get('exercise_name', '').strip()
+    if not exercise_name:
+        return jsonify({'error': 'Exercise name is required'}), 400
+        
     try:
-        exercise_name = request.form.get('exercise_name')
-        if not exercise_name:
-            return jsonify({'error': 'Exercise name is required'}), 400
-            
         workout = Workout.query.get_or_404(workout_id)
         exercise = Exercise(name=exercise_name, workout_id=workout.id)
         db.session.add(exercise)
         db.session.commit()
         
+        app.logger.info(f'Added exercise {exercise_name} to workout {workout_id}')
         return jsonify({
             'success': True,
             'exercise_id': exercise.id,
@@ -44,7 +48,8 @@ def add_exercise(workout_id):
         })
     except Exception as e:
         db.session.rollback()
-        return jsonify({'error': str(e)}), 500
+        app.logger.error(f'Error adding exercise: {str(e)}')
+        return jsonify({'error': 'Failed to add exercise'}), 500
 
 @app.route('/exercise/<int:exercise_id>/set', methods=['POST'])
 def add_set(exercise_id):
@@ -61,19 +66,3 @@ def add_set(exercise_id):
 def history():
     workouts = Workout.query.order_by(Workout.date.desc()).all()
     return render_template('history.html', workouts=workouts)
-
-@app.route('/workout/<int:workout_id>/delete', methods=['POST'])
-def delete_workout(workout_id):
-    workout = Workout.query.get_or_404(workout_id)
-    db.session.delete(workout)
-    db.session.commit()
-    flash('Workout deleted successfully', 'success')
-    return redirect(url_for('history'))
-
-@app.route('/exercise/<int:exercise_id>/delete', methods=['POST'])
-def delete_exercise(exercise_id):
-    exercise = Exercise.query.get_or_404(exercise_id)
-    workout_id = exercise.workout_id
-    db.session.delete(exercise)
-    db.session.commit()
-    return jsonify({'success': True})
