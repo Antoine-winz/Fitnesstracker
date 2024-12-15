@@ -27,13 +27,24 @@ def view_workout(workout_id):
 
 @app.route('/workout/<int:workout_id>/exercise', methods=['POST'])
 def add_exercise(workout_id):
-    exercise_name = request.form.get('exercise_name')
-    
-    exercise = Exercise(name=exercise_name, workout_id=workout_id)
-    db.session.add(exercise)
-    db.session.commit()
-    
-    return jsonify({'exercise_id': exercise.id})
+    try:
+        exercise_name = request.form.get('exercise_name')
+        if not exercise_name:
+            return jsonify({'error': 'Exercise name is required'}), 400
+            
+        workout = Workout.query.get_or_404(workout_id)
+        exercise = Exercise(name=exercise_name, workout_id=workout.id)
+        db.session.add(exercise)
+        db.session.commit()
+        
+        return jsonify({
+            'success': True,
+            'exercise_id': exercise.id,
+            'exercise_name': exercise.name
+        })
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({'error': str(e)}), 500
 
 @app.route('/exercise/<int:exercise_id>/set', methods=['POST'])
 def add_set(exercise_id):
