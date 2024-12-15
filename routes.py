@@ -83,32 +83,32 @@ def add_set(exercise_id):
 @app.route('/workout/<int:workout_id>/duplicate', methods=['POST'])
 def duplicate_workout(workout_id):
     try:
-        # Get the original workout
+        # Fetch the original workout
         original_workout = Workout.query.get_or_404(workout_id)
-        app.logger.info(f'Starting duplication of workout {workout_id}: {original_workout.name}')
+        app.logger.info(f'Duplicating workout {workout_id}: {original_workout.name}')
         
-        # Create a new workout
+        # Create a new Workout object with similar attributes
         new_workout = Workout(
             name=f"{original_workout.name} (Copy)",
             notes=original_workout.notes,
             date=datetime.utcnow()
         )
+        
         db.session.add(new_workout)
-        db.session.flush()  # Get the new workout ID
-        
-        app.logger.info(f'Created new workout with ID {new_workout.id}')
-        
-        # Duplicate exercises and sets
+        db.session.flush()
+        app.logger.info(f'Created new workout {new_workout.id}')
+
+        # Iterate over all exercises
         for orig_exercise in original_workout.exercises:
             new_exercise = Exercise(
                 name=orig_exercise.name,
                 workout_id=new_workout.id
             )
             db.session.add(new_exercise)
-            db.session.flush()  # Get the new exercise ID
-            
-            app.logger.info(f'Duplicated exercise {orig_exercise.name} for workout {new_workout.id}')
-            
+            db.session.flush()
+            app.logger.info(f'Duplicated exercise {orig_exercise.name}')
+
+            # Duplicate all sets
             for orig_set in orig_exercise.sets:
                 new_set = Set(
                     reps=orig_set.reps,
@@ -116,11 +116,11 @@ def duplicate_workout(workout_id):
                     exercise_id=new_exercise.id
                 )
                 db.session.add(new_set)
-                app.logger.info(f'Duplicated set for exercise {new_exercise.name}: {orig_set.reps} reps at {orig_set.weight}kg')
-        
+
+        # Commit all changes
         db.session.commit()
         app.logger.info(f'Successfully duplicated workout {workout_id} to {new_workout.id}')
-        
+
         return jsonify({
             'success': True,
             'workout_id': new_workout.id,
@@ -131,10 +131,7 @@ def duplicate_workout(workout_id):
         db.session.rollback()
         error_msg = f'Error duplicating workout {workout_id}: {str(e)}'
         app.logger.error(error_msg)
-        return jsonify({
-            'success': False,
-            'error': str(e)
-        }), 500
+        return jsonify({'success': False, 'error': str(e)}), 500
 
 @app.route('/history')
 def history():
