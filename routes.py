@@ -85,26 +85,30 @@ def duplicate_workout(workout_id):
     try:
         # Get the original workout
         original_workout = Workout.query.get_or_404(workout_id)
+        app.logger.info(f'Duplicating workout {workout_id}: {original_workout.name}')
         
-        # Create a new workout with the same name (add "Copy" suffix)
+        # Create a new workout
         new_workout = Workout(
             name=f"{original_workout.name} (Copy)",
             notes=original_workout.notes,
-            date=datetime.utcnow()  # Set current time for the new workout
+            date=datetime.utcnow()
         )
         db.session.add(new_workout)
-        db.session.flush()  # Get the new workout ID
+        db.session.flush()
         
-        # Duplicate all exercises and their sets
+        app.logger.info(f'Created new workout {new_workout.id}')
+        
+        # Duplicate exercises and sets
         for orig_exercise in original_workout.exercises:
             new_exercise = Exercise(
                 name=orig_exercise.name,
                 workout_id=new_workout.id
             )
             db.session.add(new_exercise)
-            db.session.flush()  # Get the new exercise ID
+            db.session.flush()
             
-            # Duplicate all sets for this exercise
+            app.logger.info(f'Duplicated exercise {orig_exercise.name}')
+            
             for orig_set in orig_exercise.sets:
                 new_set = Set(
                     reps=orig_set.reps,
@@ -114,17 +118,21 @@ def duplicate_workout(workout_id):
                 db.session.add(new_set)
         
         db.session.commit()
+        app.logger.info(f'Successfully duplicated workout {workout_id} to {new_workout.id}')
+        
         return jsonify({
             'success': True,
             'workout_id': new_workout.id,
             'message': 'Workout duplicated successfully'
         })
+        
     except Exception as e:
         db.session.rollback()
-        app.logger.error(f'Error duplicating workout: {str(e)}')
+        error_msg = f'Error duplicating workout {workout_id}: {str(e)}'
+        app.logger.error(error_msg)
         return jsonify({
             'success': False,
-            'error': str(e)
+            'error': 'Failed to duplicate workout'
         }), 500
 
 @app.route('/history')
