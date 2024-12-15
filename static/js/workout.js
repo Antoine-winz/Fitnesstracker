@@ -204,6 +204,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 if (!response.ok) {
                     const errorText = await response.text();
                     console.error('Server response:', errorText);
+                    alert('Failed to duplicate workout. Please try again later.');
                     throw new Error(`Server error: ${response.status}`);
                 }
                 
@@ -214,10 +215,13 @@ document.addEventListener('DOMContentLoaded', function() {
                     console.log('Duplication successful, redirecting to:', `/workout/${data.workout_id}`);
                     window.location.href = `/workout/${data.workout_id}`;
                 } else {
+                    console.error('Duplication failed:', data.error);
+                    alert(data.error || 'Failed to duplicate workout. Please try again.');
                     throw new Error(data.error || 'Failed to duplicate workout');
                 }
             } catch (error) {
                 console.error('Error during workout duplication:', error);
+                alert('An error occurred while duplicating the workout. Please try again.');
                 // Reset button state
                 this.disabled = false;
                 this.innerHTML = originalText;
