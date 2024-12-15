@@ -1,9 +1,11 @@
 document.addEventListener('DOMContentLoaded', function() {
-    // Initialize toastr
-    toastr.options = {
-        "positionClass": "toast-top-right",
-        "timeOut": "3000"
-    };
+    // Initialize toastr if it exists
+    if (typeof toastr !== 'undefined') {
+        toastr.options = {
+            "positionClass": "toast-top-right",
+            "timeOut": "3000"
+        };
+    }
 
     let currentExerciseId = null;
 
