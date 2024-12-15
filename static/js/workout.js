@@ -212,16 +212,12 @@ document.addEventListener('DOMContentLoaded', function() {
                 
                 if (data.success) {
                     console.log('Duplication successful, redirecting to:', `/workout/${data.workout_id}`);
-                    toastr.success('Workout duplicated successfully');
-                    setTimeout(() => {
-                        window.location.href = `/workout/${data.workout_id}`;
-                    }, 1000);
+                    window.location.href = `/workout/${data.workout_id}`;
                 } else {
                     throw new Error(data.error || 'Failed to duplicate workout');
                 }
             } catch (error) {
                 console.error('Error during workout duplication:', error);
-                toastr.error(`Failed to duplicate workout: ${error.message}`);
                 // Reset button state
                 this.disabled = false;
                 this.innerHTML = originalText;
