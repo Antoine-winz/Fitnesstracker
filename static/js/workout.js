@@ -181,39 +181,47 @@ document.addEventListener('DOMContentLoaded', function() {
             const workoutId = this.dataset.workoutId;
             const originalText = this.innerHTML;
             
+            console.log('Duplicate button clicked for workout:', workoutId);
+            
             try {
                 // Disable button and show loading state
                 this.disabled = true;
                 this.innerHTML = '<i class="bi bi-hourglass"></i> Duplicating...';
                 
-                console.log('Duplicating workout:', workoutId); // Debug log
+                console.log('Sending duplication request for workout:', workoutId);
                 
                 const response = await fetch(`/workout/${workoutId}/duplicate`, {
                     method: 'POST',
                     headers: {
-                        'X-Requested-With': 'XMLHttpRequest'
+                        'X-Requested-With': 'XMLHttpRequest',
+                        'Accept': 'application/json',
+                        'Content-Type': 'application/json'
                     }
                 });
                 
+                console.log('Received response:', response.status);
+                
                 if (!response.ok) {
-                    throw new Error(`HTTP error! status: ${response.status}`);
+                    const errorText = await response.text();
+                    console.error('Server response:', errorText);
+                    throw new Error(`Server error: ${response.status}`);
                 }
                 
                 const data = await response.json();
-                console.log('Duplication response:', data); // Debug log
+                console.log('Duplication response:', data);
                 
                 if (data.success) {
+                    console.log('Duplication successful, redirecting to:', `/workout/${data.workout_id}`);
                     toastr.success('Workout duplicated successfully');
-                    // Redirect to the new workout after a short delay
                     setTimeout(() => {
                         window.location.href = `/workout/${data.workout_id}`;
-                    }, 500);
+                    }, 1000);
                 } else {
                     throw new Error(data.error || 'Failed to duplicate workout');
                 }
             } catch (error) {
-                console.error('Error duplicating workout:', error);
-                toastr.error('Error duplicating workout: ' + error.message);
+                console.error('Error during workout duplication:', error);
+                toastr.error(`Failed to duplicate workout: ${error.message}`);
                 // Reset button state
                 this.disabled = false;
                 this.innerHTML = originalText;

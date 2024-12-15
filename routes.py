@@ -85,7 +85,7 @@ def duplicate_workout(workout_id):
     try:
         # Get the original workout
         original_workout = Workout.query.get_or_404(workout_id)
-        app.logger.info(f'Duplicating workout {workout_id}: {original_workout.name}')
+        app.logger.info(f'Starting duplication of workout {workout_id}: {original_workout.name}')
         
         # Create a new workout
         new_workout = Workout(
@@ -94,9 +94,9 @@ def duplicate_workout(workout_id):
             date=datetime.utcnow()
         )
         db.session.add(new_workout)
-        db.session.flush()
+        db.session.flush()  # Get the new workout ID
         
-        app.logger.info(f'Created new workout {new_workout.id}')
+        app.logger.info(f'Created new workout with ID {new_workout.id}')
         
         # Duplicate exercises and sets
         for orig_exercise in original_workout.exercises:
@@ -105,9 +105,9 @@ def duplicate_workout(workout_id):
                 workout_id=new_workout.id
             )
             db.session.add(new_exercise)
-            db.session.flush()
+            db.session.flush()  # Get the new exercise ID
             
-            app.logger.info(f'Duplicated exercise {orig_exercise.name}')
+            app.logger.info(f'Duplicated exercise {orig_exercise.name} for workout {new_workout.id}')
             
             for orig_set in orig_exercise.sets:
                 new_set = Set(
@@ -116,6 +116,7 @@ def duplicate_workout(workout_id):
                     exercise_id=new_exercise.id
                 )
                 db.session.add(new_set)
+                app.logger.info(f'Duplicated set for exercise {new_exercise.name}: {orig_set.reps} reps at {orig_set.weight}kg')
         
         db.session.commit()
         app.logger.info(f'Successfully duplicated workout {workout_id} to {new_workout.id}')
@@ -132,7 +133,7 @@ def duplicate_workout(workout_id):
         app.logger.error(error_msg)
         return jsonify({
             'success': False,
-            'error': 'Failed to duplicate workout'
+            'error': str(e)
         }), 500
 
 @app.route('/history')
