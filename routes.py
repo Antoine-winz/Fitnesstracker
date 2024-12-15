@@ -1,6 +1,6 @@
 from flask import render_template, request, redirect, url_for, flash, jsonify
 from app import app, db
-from models import Workout, Exercise, Set
+from models import Workout, Exercise, Set, CommonExercise
 from datetime import datetime
 
 @app.route('/')
