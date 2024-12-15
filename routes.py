@@ -86,9 +86,9 @@ def duplicate_workout(workout_id):
         # Get the original workout
         original_workout = Workout.query.get_or_404(workout_id)
         
-        # Create a new workout with the same name (add "Copie" suffix)
+        # Create a new workout with the same name (add "Copy" suffix)
         new_workout = Workout(
-            name=f"{original_workout.name} (Copie)",
+            name=f"{original_workout.name} (Copy)",
             notes=original_workout.notes,
             date=datetime.utcnow()  # Set current time for the new workout
         )
