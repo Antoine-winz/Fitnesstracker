@@ -1,0 +1,57 @@
+from datetime import datetime
+from flask import jsonify
+from app import app, db
+from models import Workout, Exercise, Set
+
+@app.route('/workout/<int:workout_id>/duplicate', methods=['POST'])
+def duplicate_workout(workout_id):
+    try:
+        # Fetch the original workout
+        original_workout = Workout.query.get_or_404(workout_id)
+        
+        # Create a new Workout object with similar attributes
+        # Append "(Copy)" to differentiate it from the original
+        new_workout = Workout(
+            name=f"{original_workout.name} (Copy)",
+            notes=original_workout.notes,
+            date=datetime.utcnow()  # Assuming date is a DateTime field
+        )
+        
+        # Add the new workout to the session and flush to get its ID
+        db.session.add(new_workout)
+        db.session.flush()
+
+        # Iterate over all exercises associated with the original workout
+        for orig_exercise in original_workout.exercises:
+            # Create a new Exercise object based on the original
+            new_exercise = Exercise(
+                name=orig_exercise.name,
+                workout_id=new_workout.id
+            )
+            db.session.add(new_exercise)
+            db.session.flush()
+
+            # For each exercise, duplicate all its sets
+            for orig_set in orig_exercise.sets:
+                new_set = Set(
+                    reps=orig_set.reps,
+                    weight=orig_set.weight,
+                    exercise_id=new_exercise.id
+                )
+                db.session.add(new_set)
+
+        # Commit all changes
+        db.session.commit()
+
+        # Return a success response with the new workout ID
+        return jsonify({
+            'success': True,
+            'workout_id': new_workout.id,
+            'message': 'Workout duplicated successfully'
+        })
+        
+    except Exception as e:
+        # Rollback in case of errors
+        db.session.rollback()
+        app.logger.error(f'Error duplicating workout: {str(e)}')
+        return jsonify({'success': False, 'error': str(e)}), 500
