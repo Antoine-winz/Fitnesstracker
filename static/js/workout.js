@@ -170,26 +170,19 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 
     // Duplicate Workout Handler
-    const duplicateButtons = document.querySelectorAll('.duplicate-workout');
-    console.log('Found duplicate buttons:', duplicateButtons.length);
-    
-    duplicateButtons.forEach(btn => {
+    document.querySelectorAll('.duplicate-workout').forEach(btn => {
         btn.addEventListener('click', async function(e) {
             e.preventDefault();
             e.stopPropagation();
             
             const workoutId = this.dataset.workoutId;
             if (!workoutId) {
-                console.error('No workout ID found on button');
-                alert('Error: Could not identify workout to duplicate');
+                console.error('No workout ID found');
                 return;
             }
             
-            console.log('Attempting to duplicate workout:', workoutId);
-            
             // Store original button state
             const originalText = this.innerHTML;
-            const originalDisabled = this.disabled;
             
             try {
                 // Update button state
@@ -203,27 +196,22 @@ document.addEventListener('DOMContentLoaded', function() {
                     }
                 });
                 
-                console.log('Server response status:', response.status);
+                const data = await response.json();
                 
                 if (!response.ok) {
-                    throw new Error(`Server returned ${response.status}`);
+                    console.error('Server error:', data.error);
+                    throw new Error(data.error || 'Failed to duplicate workout');
                 }
-                
-                const data = await response.json();
-                console.log('Server response data:', data);
                 
                 if (data.workout_id) {
-                    console.log('Duplication successful, redirecting to:', `/workout/${data.workout_id}`);
+                    console.log('Redirecting to duplicated workout');
                     window.location.href = `/workout/${data.workout_id}`;
                 } else {
-                    throw new Error('No workout ID in response');
+                    throw new Error('Invalid server response');
                 }
             } catch (error) {
-                console.error('Duplication failed:', error);
-                alert('Failed to duplicate workout. Please try again.');
-                
-                // Restore button state
-                this.disabled = originalDisabled;
+                console.error('Duplication error:', error);
+                this.disabled = false;
                 this.innerHTML = originalText;
             }
         });

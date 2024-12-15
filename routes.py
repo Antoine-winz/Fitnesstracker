@@ -121,17 +121,16 @@ def duplicate_workout(workout_id):
         db.session.commit()
         app.logger.info(f'Successfully duplicated workout {workout_id} to {new_workout.id}')
 
+        # Return response format matching frontend expectations
         return jsonify({
-            'success': True,
-            'workout_id': new_workout.id,
-            'message': 'Workout duplicated successfully'
+            'workout_id': new_workout.id
         })
         
     except Exception as e:
         db.session.rollback()
         error_msg = f'Error duplicating workout {workout_id}: {str(e)}'
         app.logger.error(error_msg)
-        return jsonify({'success': False, 'error': str(e)}), 500
+        return jsonify({'error': str(e)}), 500
 
 @app.route('/history')
 def history():
