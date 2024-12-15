@@ -50,3 +50,19 @@ def add_set(exercise_id):
 def history():
     workouts = Workout.query.order_by(Workout.date.desc()).all()
     return render_template('history.html', workouts=workouts)
+
+@app.route('/workout/<int:workout_id>/delete', methods=['POST'])
+def delete_workout(workout_id):
+    workout = Workout.query.get_or_404(workout_id)
+    db.session.delete(workout)
+    db.session.commit()
+    flash('Workout deleted successfully', 'success')
+    return redirect(url_for('history'))
+
+@app.route('/exercise/<int:exercise_id>/delete', methods=['POST'])
+def delete_exercise(exercise_id):
+    exercise = Exercise.query.get_or_404(exercise_id)
+    workout_id = exercise.workout_id
+    db.session.delete(exercise)
+    db.session.commit()
+    return jsonify({'success': True})
