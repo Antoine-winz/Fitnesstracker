@@ -171,20 +171,26 @@ document.addEventListener('DOMContentLoaded', function() {
 
 
     // Delete Workout Handler
-    document.querySelectorAll('.delete-workout').forEach(btn => {
+    const deleteButtons = document.querySelectorAll('.delete-workout');
+    console.log('Found delete buttons:', deleteButtons.length);
+    
+    deleteButtons.forEach(btn => {
         btn.addEventListener('click', async function(e) {
+            console.log('Delete button clicked');
             e.preventDefault();
             e.stopPropagation();
             
-            // Show confirmation dialog
-            const confirmDelete = window.confirm('Are you sure you want to delete this workout?');
-            if (!confirmDelete) {
+            const workoutId = this.dataset.workoutId;
+            console.log('Workout ID:', workoutId);
+            
+            if (!workoutId) {
+                console.error('No workout ID found');
                 return;
             }
             
-            const workoutId = this.dataset.workoutId;
-            if (!workoutId) {
-                console.error('No workout ID found');
+            // Show confirmation dialog
+            if (!window.confirm('Are you sure you want to delete this workout?')) {
+                console.log('Delete cancelled by user');
                 return;
             }
             
