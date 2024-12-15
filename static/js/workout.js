@@ -176,7 +176,9 @@ document.addEventListener('DOMContentLoaded', function() {
             e.preventDefault();
             e.stopPropagation();
             
-            if (!confirm('Are you sure you want to delete this workout?')) {
+            // Show confirmation dialog
+            const confirmDelete = window.confirm('Are you sure you want to delete this workout?');
+            if (!confirmDelete) {
                 return;
             }
             
@@ -208,12 +210,12 @@ document.addEventListener('DOMContentLoaded', function() {
                 }
                 
                 console.log('Workout deleted successfully');
-                // Remove the workout element from the DOM or redirect to history page
-                const workoutElement = this.closest('.workout-card');
-                if (workoutElement) {
-                    workoutElement.remove();
+                // Remove the workout element from the DOM
+                const workoutCard = this.closest('.card');
+                if (workoutCard) {
+                    workoutCard.remove();
                 } else {
-                    window.location.href = '/history';
+                    window.location.reload();
                 }
                 
             } catch (error) {
