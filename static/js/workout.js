@@ -10,6 +10,35 @@ document.addEventListener('DOMContentLoaded', function() {
     // Exercise Modal Setup
     const exerciseModal = new bootstrap.Modal(document.getElementById('exerciseModal'));
     const setModal = new bootstrap.Modal(document.getElementById('setModal'));
+
+    // Exercise name input with suggestions
+    const exerciseNameInput = document.getElementById('exerciseName');
+    if (exerciseNameInput) {
+        let debounceTimeout;
+        exerciseNameInput.addEventListener('input', function(e) {
+            clearTimeout(debounceTimeout);
+            debounceTimeout = setTimeout(async () => {
+                const query = e.target.value.trim();
+                if (query.length >= 2) {
+                    try {
+                        const response = await fetch(`/exercises/suggestions?q=${encodeURIComponent(query)}`);
+                        const suggestions = await response.json();
+                        
+                        const datalist = document.getElementById('exerciseSuggestions');
+                        datalist.innerHTML = '';
+                        suggestions.forEach(suggestion => {
+                            const option = document.createElement('option');
+                            option.value = suggestion.name;
+                            option.textContent = `${suggestion.name} (${suggestion.category || 'Uncategorized'})`;
+                            datalist.appendChild(option);
+                        });
+                    } catch (error) {
+                        console.error('Error fetching suggestions:', error);
+                    }
+                }
+            }, 300); // Debounce delay
+        });
+    }
     
     // Add Exercise Button Handler
     const addExerciseBtn = document.getElementById('addExerciseBtn');

@@ -25,6 +25,15 @@ def view_workout(workout_id):
     workout = Workout.query.get_or_404(workout_id)
     return render_template('view_workout.html', workout=workout)
 
+@app.route('/exercises/suggestions', methods=['GET'])
+def get_exercise_suggestions():
+    query = request.args.get('q', '').strip().lower()
+    suggestions = CommonExercise.query.filter(
+        CommonExercise.name.ilike(f'%{query}%')
+    ).order_by(CommonExercise.use_count.desc()).limit(5).all()
+    
+    return jsonify([{'id': ex.id, 'name': ex.name, 'category': ex.category} for ex in suggestions])
+
 @app.route('/workout/<int:workout_id>/exercise', methods=['POST'])
 def add_exercise(workout_id):
     if not request.form:
@@ -38,6 +47,15 @@ def add_exercise(workout_id):
         workout = Workout.query.get_or_404(workout_id)
         exercise = Exercise(name=exercise_name, workout_id=workout.id)
         db.session.add(exercise)
+        
+        # Update or create common exercise
+        common_exercise = CommonExercise.query.filter_by(name=exercise_name).first()
+        if common_exercise:
+            common_exercise.use_count += 1
+        else:
+            common_exercise = CommonExercise(name=exercise_name)
+            db.session.add(common_exercise)
+        
         db.session.commit()
         
         app.logger.info(f'Added exercise {exercise_name} to workout {workout_id}')
@@ -66,3 +84,27 @@ def add_set(exercise_id):
 def history():
     workouts = Workout.query.order_by(Workout.date.desc()).all()
     return render_template('history.html', workouts=workouts)
+@app.route('/admin/seed-exercises', methods=['POST'])
+def seed_exercises():
+    common_exercises = [
+        {'name': 'Bench Press', 'category': 'Chest'},
+        {'name': 'Squat', 'category': 'Legs'},
+        {'name': 'Deadlift', 'category': 'Back'},
+        {'name': 'Overhead Press', 'category': 'Shoulders'},
+        {'name': 'Pull-ups', 'category': 'Back'},
+        {'name': 'Push-ups', 'category': 'Chest'},
+        {'name': 'Barbell Row', 'category': 'Back'},
+        {'name': 'Leg Press', 'category': 'Legs'},
+        {'name': 'Dumbbell Curl', 'category': 'Arms'},
+        {'name': 'Tricep Extension', 'category': 'Arms'}
+    ]
+    
+    try:
+        for exercise in common_exercises:
+            if not CommonExercise.query.filter_by(name=exercise['name']).first():
+                db.session.add(CommonExercise(**exercise))
+        db.session.commit()
+        return jsonify({'message': 'Successfully seeded common exercises'})
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({'error': str(e)}), 500
