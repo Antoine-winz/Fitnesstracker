@@ -171,6 +171,7 @@ document.addEventListener('DOMContentLoaded', function() {
     document.querySelectorAll('.duplicate-workout').forEach(btn => {
         btn.addEventListener('click', async function(e) {
             e.preventDefault();
+            e.stopPropagation();
             
             // Prevent double-clicking
             if (this.disabled) return;
@@ -183,28 +184,34 @@ document.addEventListener('DOMContentLoaded', function() {
                 this.disabled = true;
                 this.innerHTML = '<i class="bi bi-hourglass"></i> Duplicating...';
                 
+                console.log('Duplicating workout:', workoutId); // Debug log
+                
                 const response = await fetch(`/workout/${workoutId}/duplicate`, {
                     method: 'POST',
                     headers: {
-                        'Content-Type': 'application/json',
+                        'X-Requested-With': 'XMLHttpRequest'
                     }
                 });
                 
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                
                 const data = await response.json();
+                console.log('Duplication response:', data); // Debug log
                 
                 if (data.success) {
                     toastr.success('Workout duplicated successfully');
-                    // Redirect to the new workout
-                    window.location.href = `/workout/${data.workout_id}`;
+                    // Redirect to the new workout after a short delay
+                    setTimeout(() => {
+                        window.location.href = `/workout/${data.workout_id}`;
+                    }, 500);
                 } else {
-                    toastr.error(data.error || 'Failed to duplicate workout');
-                    // Reset button state
-                    this.disabled = false;
-                    this.innerHTML = originalText;
+                    throw new Error(data.error || 'Failed to duplicate workout');
                 }
             } catch (error) {
                 console.error('Error duplicating workout:', error);
-                toastr.error('Error duplicating workout');
+                toastr.error('Error duplicating workout: ' + error.message);
                 // Reset button state
                 this.disabled = false;
                 this.innerHTML = originalText;
