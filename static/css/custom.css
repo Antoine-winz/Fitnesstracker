@@ -79,6 +79,30 @@ h1, h2, h3, h4, h5, h6 {
     border-radius: 8px;
     border: 1px solid rgba(255, 255, 255, 0.1);
     background-color: var(--bs-dark);
+    position: relative;
+}
+
+#exerciseList {
+    position: absolute;
+    width: 100%;
+    max-height: 200px;
+    overflow-y: auto;
+    z-index: 1050;
+    background-color: var(--bs-dark);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 8px;
+    margin-top: 4px;
+}
+
+.modal-content {
+    display: flex;
+    flex-direction: column;
+    min-height: 300px;
+}
+
+.modal-body {
+    flex: 1;
+    padding-bottom: 70px;
 }
 
 /* Modal styling */
