@@ -51,8 +51,28 @@ function toggleLoading(element, isLoading) {
 document.addEventListener('DOMContentLoaded', function() {
     // Add Exercise functionality
     const addExerciseBtn = document.getElementById('addExerciseBtn');
-    const exerciseModal = new bootstrap.Modal(document.getElementById('exerciseModal'));
-    const setModal = new bootstrap.Modal(document.getElementById('setModal'));
+    const exerciseModalEl = document.getElementById('exerciseModal');
+    const setModalEl = document.getElementById('setModal');
+    const exerciseModal = new bootstrap.Modal(exerciseModalEl, {
+        backdrop: 'static',
+        keyboard: false
+    });
+    const setModal = new bootstrap.Modal(setModalEl, {
+        backdrop: 'static',
+        keyboard: false
+    });
+    
+    // Reset forms when modals are hidden
+    exerciseModalEl.addEventListener('hidden.bs.modal', function () {
+        const form = exerciseModalEl.querySelector('form');
+        if (form) form.reset();
+    });
+    
+    setModalEl.addEventListener('hidden.bs.modal', function () {
+        const form = setModalEl.querySelector('form');
+        if (form) form.reset();
+    });
+    
     let currentExerciseId = null;
     let currentCategory = 'all';
 
