@@ -30,9 +30,12 @@
         <div class="card-body">
             <div class="sets-container">
                 {% for set in exercise.sets %}
-                <div class="set-row">
+                <div class="set-row d-flex align-items-center">
                     <span class="set-number">Set {{ loop.index }}:</span>
                     <span class="set-details">{{ set.reps }} reps - {{ set.weight }}kg</span>
+                    <form action="{{ url_for('duplicate_set', set_id=set.id) }}" method="POST" class="ms-2">
+                        <button type="submit" class="btn btn-outline-secondary btn-sm">Duplicate</button>
+                    </form>
                 </div>
                 {% endfor %}
             </div>
