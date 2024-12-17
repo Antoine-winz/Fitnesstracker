@@ -96,85 +96,18 @@
     transform: translateX(0);
 }
 
-/* Modal Improvements */
-.modal {
-    z-index: 1050 !important;
-    animation: none !important;
-    transform: none !important;
-    transition: none !important;
-}
-
-.modal-backdrop {
-    z-index: 1040 !important;
-    animation: none !important;
-    transition: none !important;
-}
-
-.modal-dialog {
-    transform: none !important;
-    transition: none !important;
-    animation: none !important;
-    margin: 1.75rem auto !important;
-    max-width: 500px;
-}
-
+/* Modal - Minimal styling for dark theme */
 .modal-content {
-    transform: none !important;
-    transition: none !important;
-    animation: none !important;
     background-color: var(--bs-dark);
     border: 1px solid rgba(255, 255, 255, 0.1);
-    border-radius: 10px;
-    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
 }
 
 .modal-header {
-    background-color: rgba(0, 0, 0, 0.2);
     border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-    border-top-left-radius: 9px;
-    border-top-right-radius: 9px;
-    padding: 1rem 1.25rem;
-}
-
-.modal-body {
-    padding: 1.5rem;
-    background-color: var(--bs-dark);
 }
 
 .modal-footer {
-    background-color: rgba(0, 0, 0, 0.1);
     border-top: 1px solid rgba(255, 255, 255, 0.1);
-    border-bottom-left-radius: 9px;
-    border-bottom-right-radius: 9px;
-    padding: 1rem 1.25rem;
-}
-
-/* Remove all animations and transitions from modal elements */
-.modal *,
-.modal *::before,
-.modal *::after {
-    animation: none !important;
-    transform: none !important;
-    transition: none !important;
-    transform-style: flat !important;
-    perspective: none !important;
-    backface-visibility: visible !important;
-}
-
-/* Override hover effects inside modals */
-.modal .btn,
-.modal .btn:hover,
-.modal .btn:active,
-.modal .btn:focus {
-    transform: none !important;
-    transition: none !important;
-    animation: none !important;
-    box-shadow: none !important;
-}
-
-/* Prevent any movement on hover */
-.modal .btn:hover {
-    transform: none !important;
 }
 
 /* Input Validation Styles */
