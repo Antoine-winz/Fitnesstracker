@@ -53,6 +53,22 @@ def delete_workout(workout_id):
     db.session.commit()
     return redirect(url_for('history'))
 
+@app.route('/workout/<int:workout_id>/duplicate', methods=['POST'])
+def duplicate_workout(workout_id):
+    original_workout = Workout.query.get_or_404(workout_id)
+    new_workout = Workout(name=f"Copy of {original_workout.name}", notes=original_workout.notes)
+    db.session.add(new_workout)
+    
+    for exercise in original_workout.exercises:
+        new_exercise = Exercise(name=exercise.name, workout=new_workout)
+        db.session.add(new_exercise)
+        for set in exercise.sets:
+            new_set = Set(reps=set.reps, weight=set.weight, exercise=new_exercise)
+            db.session.add(new_set)
+    
+    db.session.commit()
+    return redirect(url_for('view_workout', workout_id=new_workout.id))
+
 @app.route('/history')
 def history():
     workouts = Workout.query.order_by(Workout.date.desc()).all()
