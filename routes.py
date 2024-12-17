@@ -134,6 +134,14 @@ def duplicate_set(set_id):
     db.session.commit()
     return redirect(url_for('view_workout', workout_id=set.exercise.workout_id))
 
+@app.route('/set/<int:set_id>/delete', methods=['POST'])
+def delete_set(set_id):
+    set = Set.query.get_or_404(set_id)
+    workout_id = set.exercise.workout_id
+    db.session.delete(set)
+    db.session.commit()
+    return redirect(url_for('view_workout', workout_id=workout_id))
+
 @app.route('/history')
 def history():
     workouts = Workout.query.order_by(Workout.date.desc()).all()
