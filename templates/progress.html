@@ -1,0 +1,36 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container">
+    <h2 class="mb-4">Exercise Progress</h2>
+    
+    {% if categorized_exercises %}
+        <div class="row">
+            {% for category, exercises in categorized_exercises.items() %}
+            <div class="col-md-6 mb-4">
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="card-title mb-0">{{ category }}</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="list-group">
+                            {% for exercise in exercises|sort %}
+                            <a href="{{ url_for('exercise_progress', exercise_name=exercise) }}" 
+                               class="list-group-item list-group-item-action d-flex justify-content-between align-items-center">
+                                {{ exercise }}
+                                <i class="fas fa-chevron-right"></i>
+                            </a>
+                            {% endfor %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    {% else %}
+        <div class="alert alert-info">
+            No exercises found. Start by adding exercises to your workouts!
+        </div>
+    {% endif %}
+</div>
+{% endblock %}

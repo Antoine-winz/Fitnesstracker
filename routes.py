@@ -212,4 +212,33 @@ def exercise_progress(exercise_name):
                              history=history if history else None)
     except Exception as e:
         app.logger.error(f"Error in exercise_progress: {str(e)}")
+@app.route('/progress')
+def progress():
+    try:
+        # Get all unique exercise names from the database
+        exercises = db.session.query(Exercise.name)\
+            .distinct()\
+            .order_by(Exercise.name)\
+            .all()
+        
+        # Extract exercise names from query result
+        exercise_names = [exercise[0] for exercise in exercises]
+        
+        # Group exercises by their categories using the EXERCISE_LIST
+        categorized_exercises = {}
+        for exercise_name in exercise_names:
+            # Find the category for this exercise
+            matching_exercises = [ex for ex in EXERCISE_LIST if ex['name'] == exercise_name]
+            category = matching_exercises[0]['category'] if matching_exercises else 'Other'
+            
+            if category not in categorized_exercises:
+                categorized_exercises[category] = []
+            categorized_exercises[category].append(exercise_name)
+        
+        return render_template('progress.html', 
+                            categorized_exercises=categorized_exercises)
+    except Exception as e:
+        app.logger.error(f"Error in progress page: {str(e)}")
+        return "An error occurred while loading the progress page", 500
+
         return "An error occurred while loading exercise progress", 500
