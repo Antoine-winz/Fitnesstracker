@@ -58,6 +58,16 @@ def duplicate_workout(workout_id):
     original_workout = Workout.query.get_or_404(workout_id)
     new_workout = Workout(name=f"Copy of {original_workout.name}", notes=original_workout.notes)
     db.session.add(new_workout)
+    
+    for exercise in original_workout.exercises:
+        new_exercise = Exercise(name=exercise.name, workout=new_workout)
+        db.session.add(new_exercise)
+        for set in exercise.sets:
+            new_set = Set(reps=set.reps, weight=set.weight, exercise=new_exercise)
+            db.session.add(new_set)
+    
+    db.session.commit()
+    return redirect(url_for('view_workout', workout_id=new_workout.id))
 
 @app.route('/workout/<int:workout_id>/rename', methods=['POST'])
 def rename_workout(workout_id):
@@ -66,10 +76,8 @@ def rename_workout(workout_id):
     if new_name:
         workout.name = new_name
         db.session.commit()
-    return redirect(request.referrer or url_for('history'))
-
-    for exercise in original_workout.exercises:
-        new_exercise = Exercise(name=exercise.name, workout=new_workout)
+        return redirect(request.referrer or url_for('history'))
+    return redirect(url_for('history'))
         db.session.add(new_exercise)
         for set in exercise.sets:
             new_set = Set(reps=set.reps, weight=set.weight, exercise=new_exercise)
