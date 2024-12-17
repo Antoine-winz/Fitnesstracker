@@ -30,6 +30,10 @@
                     {% endfor %}
                 </div>
                 <div class="mt-2">
+                    <button class="btn btn-outline-info btn-sm" 
+                            onclick="renameWorkout({{ workout.id }}, '{{ workout.name }}')">
+                        Rename
+                    </button>
                     <a href="{{ url_for('view_workout', workout_id=workout.id) }}" 
                        class="btn btn-outline-primary btn-sm">View Details</a>
                     <form action="{{ url_for('duplicate_workout', workout_id=workout.id) }}" 

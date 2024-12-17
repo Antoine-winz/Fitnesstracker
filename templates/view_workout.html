@@ -1,7 +1,13 @@
 {% extends "base.html" %}
 
 {% block content %}
-<h2>{{ workout.name }}</h2>
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <h2>{{ workout.name }}</h2>
+    <button class="btn btn-outline-info" 
+            onclick="renameWorkout({{ workout.id }}, '{{ workout.name }}')">
+        Rename Workout
+    </button>
+</div>
 <p class="text-muted">{{ workout.date.strftime('%Y-%m-%d %H:%M') }}</p>
 
 <div class="mb-4">
@@ -38,8 +44,7 @@
                 <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
             </div>
             <div class="modal-body">
-                <input type="text" class="form-control" id="exerciseName" placeholder="Exercise name" list="exerciseSuggestions">
-                <datalist id="exerciseSuggestions"></datalist>
+                <input type="text" class="form-control" id="exerciseName" placeholder="Exercise name">
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
