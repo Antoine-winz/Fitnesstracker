@@ -67,7 +67,7 @@ def rename_workout(workout_id):
         workout.name = new_name
         db.session.commit()
     return redirect(request.referrer or url_for('history'))
-    
+
     for exercise in original_workout.exercises:
         new_exercise = Exercise(name=exercise.name, workout=new_workout)
         db.session.add(new_exercise)
