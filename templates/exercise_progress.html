@@ -4,7 +4,7 @@
 <div class="container">
     <h2 class="mb-4">Progress for {{ exercise_name }}</h2>
     
-    {% if history %}
+    {% if history and history|length > 0 %}
         <div class="row mb-4">
             <div class="col-md-6">
                 <div class="card">
@@ -13,8 +13,8 @@
                     </div>
                     <div class="card-body">
                         <p><strong>Date:</strong> {{ history[0].date.strftime('%Y-%m-%d %H:%M') }}</p>
-                        <p><strong>Max Weight:</strong> {{ history[0].max_weight }}kg</p>
-                        <p><strong>Total Volume:</strong> {{ history[0].total_volume }}kg</p>
+                        <p><strong>Max Weight:</strong> {{ "%.1f"|format(history[0].max_weight) }}kg</p>
+                        <p><strong>Total Volume:</strong> {{ "%.1f"|format(history[0].total_volume) }}kg</p>
                     </div>
                 </div>
             </div>
@@ -24,8 +24,10 @@
                         <h5 class="card-title mb-0">Personal Records</h5>
                     </div>
                     <div class="card-body">
-                        <p><strong>Highest Weight:</strong> {{ [entry.max_weight for entry in history]|max }}kg</p>
-                        <p><strong>Best Volume:</strong> {{ [entry.total_volume for entry in history]|max }}kg</p>
+                        {% set max_weight = history|map(attribute='max_weight')|list|max %}
+                        {% set max_volume = history|map(attribute='total_volume')|list|max %}
+                        <p><strong>Highest Weight:</strong> {{ "%.1f"|format(max_weight) }}kg</p>
+                        <p><strong>Best Volume:</strong> {{ "%.1f"|format(max_volume) }}kg</p>
                     </div>
                 </div>
             </div>
@@ -52,12 +54,12 @@
                                 <td>{{ entry.date.strftime('%Y-%m-%d') }}</td>
                                 <td>
                                     {% for set in entry.sets %}
-                                        {{ set.reps }}x{{ set.weight }}kg
+                                        {{ set.reps }}x{{ "%.1f"|format(set.weight) }}kg
                                         {% if not loop.last %}, {% endif %}
                                     {% endfor %}
                                 </td>
-                                <td>{{ entry.max_weight }}kg</td>
-                                <td>{{ entry.total_volume }}kg</td>
+                                <td>{{ "%.1f"|format(entry.max_weight) }}kg</td>
+                                <td>{{ "%.1f"|format(entry.total_volume) }}kg</td>
                             </tr>
                             {% endfor %}
                         </tbody>

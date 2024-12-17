@@ -174,30 +174,34 @@ def rename_workout(workout_id):
 
 @app.route('/exercise/progress/<exercise_name>')
 def exercise_progress(exercise_name):
-    # Get all exercises with this name
-    exercises = Exercise.query.filter(Exercise.name == exercise_name)\
-        .join(Workout)\
-        .order_by(Workout.date.desc())\
-        .all()
-    
-    if not exercises:
-        return redirect(url_for('index'))
-    
-    # Calculate statistics
-    history = []
-    for exercise in exercises:
-        if exercise.sets:
-            history.append({
-                'date': exercise.workout.date,
-                'max_weight': exercise.max_weight,
-                'total_volume': exercise.total_volume,
-                'sets': [{
-                    'reps': set.reps,
-                    'weight': set.weight,
-                    'volume': set.volume
-                } for set in exercise.sets]
-            })
-    
-    return render_template('exercise_progress.html',
-                         exercise_name=exercise_name,
-                         history=history)
+    try:
+        # Get all exercises with this name
+        exercises = Exercise.query.filter(Exercise.name == exercise_name)\
+            .join(Workout)\
+            .order_by(Workout.date.desc())\
+            .all()
+        
+        if not exercises:
+            return redirect(url_for('index'))
+        
+        # Calculate statistics
+        history = []
+        for exercise in exercises:
+            if exercise.sets:
+                history.append({
+                    'date': exercise.workout.date,
+                    'max_weight': float(exercise.max_weight),
+                    'total_volume': float(exercise.total_volume),
+                    'sets': [{
+                        'reps': int(set.reps),
+                        'weight': float(set.weight),
+                        'volume': float(set.volume)
+                    } for set in exercise.sets]
+                })
+        
+        return render_template('exercise_progress.html',
+                             exercise_name=exercise_name,
+                             history=history if history else None)
+    except Exception as e:
+        app.logger.error(f"Error in exercise_progress: {str(e)}")
+        return "An error occurred while loading exercise progress", 500
