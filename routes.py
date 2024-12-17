@@ -12,7 +12,8 @@ def parse_exercise_list():
         for line in f:
             line = line.strip()
             if line.startswith('####'):
-                current_category = line.replace('#', '').strip()
+                # Remove asterisks and clean up the category name
+                current_category = line.replace('#', '').replace('*', '').strip()
             elif re.match(r'^\d+\.', line):
                 exercise_name = re.sub(r'^\d+\.\s*', '', line.strip())
                 if exercise_name:
