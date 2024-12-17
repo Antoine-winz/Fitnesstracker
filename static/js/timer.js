@@ -5,7 +5,11 @@ class WorkoutTimer {
         this.totalSeconds = 0;
         this.interval = null;
         this.isRunning = false;
+        // Initialize and preload sound
         this.sound = new Audio('/static/sounds/timer-end.mp3');
+        this.sound.preload = 'auto';
+        // Try to load the sound immediately
+        this.sound.load();
 
         // DOM elements
         this.minutesDisplay = document.getElementById('minutes');
@@ -74,9 +78,16 @@ class WorkoutTimer {
         this.secondsInput.disabled = false;
     }
 
-    complete() {
+    async complete() {
         this.pause();
-        this.sound.play().catch(error => console.log('Error playing sound:', error));
+        try {
+            // Try to play the sound multiple times if needed
+            await this.sound.play();
+        } catch (error) {
+            console.error('Could not play sound:', error);
+            // Reload the sound for next attempt
+            this.sound.load();
+        }
         alert('Timer Complete!');
         this.reset();
     }
