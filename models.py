@@ -19,10 +19,3 @@ class Set(db.Model):
     reps = db.Column(db.Integer, nullable=False)
     weight = db.Column(db.Float, nullable=False)
     exercise_id = db.Column(db.Integer, db.ForeignKey('exercise.id'), nullable=False)
-
-class CommonExercise(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.String(100), nullable=False, unique=True)
-    category = db.Column(db.String(50))  # e.g., 'Chest', 'Legs', 'Back'
-    created_at = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
-    use_count = db.Column(db.Integer, default=0)  # Track how often this exercise is used

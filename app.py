@@ -22,23 +22,3 @@ with app.app_context():
     import models
     import routes
     db.create_all()
-    
-    # Import and create necessary tables
-    from models import CommonExercise
-    if not CommonExercise.query.first():
-        # Seed common exercises if none exist
-        common_exercises = [
-            {'name': 'Bench Press', 'category': 'Chest'},
-            {'name': 'Squat', 'category': 'Legs'},
-            {'name': 'Deadlift', 'category': 'Back'},
-            {'name': 'Overhead Press', 'category': 'Shoulders'},
-            {'name': 'Pull-ups', 'category': 'Back'},
-            {'name': 'Push-ups', 'category': 'Chest'},
-            {'name': 'Barbell Row', 'category': 'Back'},
-            {'name': 'Leg Press', 'category': 'Legs'},
-            {'name': 'Dumbbell Curl', 'category': 'Arms'},
-            {'name': 'Tricep Extension', 'category': 'Arms'}
-        ]
-        for exercise in common_exercises:
-            db.session.add(CommonExercise(**exercise))
-        db.session.commit()
