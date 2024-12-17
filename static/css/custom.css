@@ -81,6 +81,26 @@ h1, h2, h3, h4, h5, h6 {
     background-color: var(--bs-dark);
 }
 
+/* Modal Styles */
+.modal-body {
+    min-height: 200px;
+    max-height: 400px;
+    overflow-y: auto;
+}
+
+datalist {
+    max-height: 150px;
+    overflow-y: auto;
+}
+
+.modal-footer {
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+    position: sticky;
+    bottom: 0;
+    background: var(--bs-dark);
+    z-index: 1000;
+}
+
 #exerciseName::-webkit-calendar-picker-indicator {
     display: none !important;
 }
