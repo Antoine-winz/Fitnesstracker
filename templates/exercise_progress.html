@@ -1,0 +1,74 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container">
+    <h2 class="mb-4">Progress for {{ exercise_name }}</h2>
+    
+    {% if history %}
+        <div class="row mb-4">
+            <div class="col-md-6">
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="card-title mb-0">Latest Performance</h5>
+                    </div>
+                    <div class="card-body">
+                        <p><strong>Date:</strong> {{ history[0].date.strftime('%Y-%m-%d %H:%M') }}</p>
+                        <p><strong>Max Weight:</strong> {{ history[0].max_weight }}kg</p>
+                        <p><strong>Total Volume:</strong> {{ history[0].total_volume }}kg</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="card-title mb-0">Personal Records</h5>
+                    </div>
+                    <div class="card-body">
+                        <p><strong>Highest Weight:</strong> {{ max(entry.max_weight for entry in history) }}kg</p>
+                        <p><strong>Best Volume:</strong> {{ max(entry.total_volume for entry in history) }}kg</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="card mb-4">
+            <div class="card-header">
+                <h5 class="card-title mb-0">Exercise History</h5>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>Date</th>
+                                <th>Sets</th>
+                                <th>Max Weight</th>
+                                <th>Total Volume</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for entry in history %}
+                            <tr>
+                                <td>{{ entry.date.strftime('%Y-%m-%d') }}</td>
+                                <td>
+                                    {% for set in entry.sets %}
+                                        {{ set.reps }}x{{ set.weight }}kg
+                                        {% if not loop.last %}, {% endif %}
+                                    {% endfor %}
+                                </td>
+                                <td>{{ entry.max_weight }}kg</td>
+                                <td>{{ entry.total_volume }}kg</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    {% else %}
+        <div class="alert alert-info">
+            No history found for this exercise.
+        </div>
+    {% endif %}
+</div>
+{% endblock %}
