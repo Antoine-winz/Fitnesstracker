@@ -101,6 +101,14 @@ def rename_exercise(exercise_id):
         db.session.commit()
     return redirect(url_for('view_workout', workout_id=exercise.workout_id))
 
+@app.route('/exercise/<int:exercise_id>/delete', methods=['POST'])
+def delete_exercise(exercise_id):
+    exercise = Exercise.query.get_or_404(exercise_id)
+    workout_id = exercise.workout_id
+    db.session.delete(exercise)
+    db.session.commit()
+    return redirect(url_for('view_workout', workout_id=workout_id))
+
 @app.route('/history')
 def history():
     workouts = Workout.query.order_by(Workout.date.desc()).all()
