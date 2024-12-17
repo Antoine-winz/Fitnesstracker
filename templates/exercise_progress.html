@@ -24,8 +24,8 @@
                         <h5 class="card-title mb-0">Personal Records</h5>
                     </div>
                     <div class="card-body">
-                        <p><strong>Highest Weight:</strong> {{ max(entry.max_weight for entry in history) }}kg</p>
-                        <p><strong>Best Volume:</strong> {{ max(entry.total_volume for entry in history) }}kg</p>
+                        <p><strong>Highest Weight:</strong> {{ [entry.max_weight for entry in history]|max }}kg</p>
+                        <p><strong>Best Volume:</strong> {{ [entry.total_volume for entry in history]|max }}kg</p>
                     </div>
                 </div>
             </div>
