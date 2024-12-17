@@ -92,6 +92,15 @@ def rename_workout(workout_id):
         return redirect(request.referrer or url_for('history'))
     return redirect(url_for('history'))
 
+@app.route('/exercise/<int:exercise_id>/rename', methods=['POST'])
+def rename_exercise(exercise_id):
+    exercise = Exercise.query.get_or_404(exercise_id)
+    new_name = request.form.get('exercise_name')
+    if new_name:
+        exercise.name = new_name
+        db.session.commit()
+    return redirect(url_for('view_workout', workout_id=exercise.workout_id))
+
 @app.route('/history')
 def history():
     workouts = Workout.query.order_by(Workout.date.desc()).all()

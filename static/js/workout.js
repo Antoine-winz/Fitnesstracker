@@ -1,3 +1,13 @@
+function renameExercise(exerciseId, currentName) {
+    const modal = new bootstrap.Modal(document.getElementById('exerciseRenameModal'));
+    const form = document.getElementById('exerciseRenameForm');
+    const input = document.getElementById('newExerciseName');
+    
+    input.value = currentName;
+    form.action = `/exercise/${exerciseId}/rename`;
+    modal.show();
+}
+
 function renameWorkout(workoutId, currentName) {
     const modal = new bootstrap.Modal(document.getElementById('renameModal'));
     const form = document.getElementById('renameForm');
