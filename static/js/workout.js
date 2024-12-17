@@ -31,6 +31,25 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 
+    // Exercise name autocomplete
+    const exerciseNameInput = document.getElementById('exerciseName');
+    const exerciseList = document.getElementById('exerciseList');
+
+    if (exerciseNameInput) {
+        exerciseNameInput.addEventListener('input', async (e) => {
+            const query = e.target.value;
+            if (query.length >= 2) {
+                const response = await fetch(`/api/exercises/suggest?q=${encodeURIComponent(query)}`);
+                if (response.ok) {
+                    const suggestions = await response.json();
+                    exerciseList.innerHTML = suggestions
+                        .map(exercise => `<option value="${exercise.name}">`)
+                        .join('');
+                }
+            }
+        });
+    }
+
     // Save Exercise
     document.getElementById('saveExercise')?.addEventListener('click', async () => {
         const exerciseName = document.getElementById('exerciseName').value;
