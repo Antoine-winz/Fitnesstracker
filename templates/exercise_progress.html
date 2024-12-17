@@ -1,6 +1,7 @@
 {% extends "base.html" %}
 
 {% block content %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <div class="container">
     <h2 class="mb-4">Progress for {{ exercise_name }}</h2>
     
@@ -67,10 +68,79 @@
                 </div>
             </div>
         </div>
+
+        <div class="card mb-4">
+            <div class="card-header">
+                <h5 class="card-title mb-0">Weight vs Reps Chart</h5>
+            </div>
+            <div class="card-body">
+                <canvas id="weightRepsChart"></canvas>
+            </div>
+        </div>
     {% else %}
         <div class="alert alert-info">
             No history found for this exercise.
         </div>
     {% endif %}
 </div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    {% if history and history|length > 0 %}
+    const ctx = document.getElementById('weightRepsChart').getContext('2d');
+    const data = [];
+    
+    {% for entry in history %}
+        {% for set in entry.sets %}
+            data.push({
+                x: {{ set.reps }},
+                y: {{ set.weight }},
+                date: '{{ entry.date.strftime("%Y-%m-%d") }}'
+            });
+        {% endfor %}
+    {% endfor %}
+    
+    new Chart(ctx, {
+        type: 'scatter',
+        data: {
+            datasets: [{
+                label: 'Weight vs Reps',
+                data: data,
+                backgroundColor: 'rgba(54, 162, 235, 0.6)',
+                borderColor: 'rgba(54, 162, 235, 1)',
+                borderWidth: 1
+            }]
+        },
+        options: {
+            responsive: true,
+            plugins: {
+                tooltip: {
+                    callbacks: {
+                        label: function(context) {
+                            return `Date: ${context.raw.date}, Reps: ${context.raw.x}, Weight: ${context.raw.y}kg`;
+                        }
+                    }
+                }
+            },
+            scales: {
+                x: {
+                    type: 'linear',
+                    position: 'bottom',
+                    title: {
+                        display: true,
+                        text: 'Reps'
+                    }
+                },
+                y: {
+                    title: {
+                        display: true,
+                        text: 'Weight (kg)'
+                    }
+                }
+            }
+        }
+    });
+    {% endif %}
+});
+</script>
 {% endblock %}
