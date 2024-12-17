@@ -95,10 +95,16 @@ def rename_exercise(exercise_id):
 @app.route('/api/exercises/suggest', methods=['GET'])
 def suggest_exercises():
     query = request.args.get('q', '').lower()
-    suggestions = [
-        exercise for exercise in EXERCISE_LIST
-        if query in exercise['name'].lower()
-    ]
+    suggestions = []
+    for exercise in EXERCISE_LIST:
+        if query in exercise['name'].lower():
+            # Format the suggestion to include the category
+            exercise_with_category = {
+                'name': exercise['name'],
+                'category': exercise['category'],
+                'display': f"{exercise['name']} ({exercise['category']})"
+            }
+            suggestions.append(exercise_with_category)
     return jsonify(suggestions)
 
 @app.route('/exercise/<int:exercise_id>/delete', methods=['POST'])

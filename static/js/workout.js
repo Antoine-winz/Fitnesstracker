@@ -43,7 +43,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 if (response.ok) {
                     const suggestions = await response.json();
                     exerciseList.innerHTML = suggestions
-                        .map(exercise => `<option value="${exercise.name}">`)
+                        .map(exercise => `<option value="${exercise.name}" label="${exercise.display}">`)
                         .join('');
                 }
             }

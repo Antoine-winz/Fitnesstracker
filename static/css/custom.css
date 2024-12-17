@@ -33,3 +33,17 @@
 .card-header {
     background-color: rgba(0,0,0,0.2);
 }
+
+/* Exercise autofill styling */
+#exerciseName {
+    width: 100%;
+}
+
+#exerciseName::-webkit-calendar-picker-indicator {
+    display: none !important;
+}
+
+datalist option {
+    font-family: var(--bs-font-sans-serif);
+    padding: 4px;
+}
