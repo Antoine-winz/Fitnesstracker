@@ -14,6 +14,31 @@
     <button class="btn btn-primary" id="addExerciseBtn">Add Exercise</button>
 </div>
 
+<div class="card mb-4" id="timerCard">
+    <div class="card-header">
+        <h5 class="card-title mb-0">Workout Timer</h5>
+    </div>
+    <div class="card-body">
+        <div class="timer-display text-center mb-3">
+            <span id="minutes">00</span>:<span id="seconds">00</span>
+        </div>
+        <div class="timer-controls d-flex justify-content-center gap-2 mb-3">
+            <button class="btn btn-primary" id="startTimer">Start</button>
+            <button class="btn btn-warning" id="pauseTimer">Pause</button>
+            <button class="btn btn-danger" id="resetTimer">Reset</button>
+        </div>
+        <div class="timer-settings">
+            <div class="row g-2">
+                <div class="col">
+                    <input type="number" class="form-control" id="timerMinutes" placeholder="Minutes" min="0" max="59" value="0">
+                </div>
+                <div class="col">
+                    <input type="number" class="form-control" id="timerSeconds" placeholder="Seconds" min="0" max="59" value="0">
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
 <div id="exercises">
     {% for exercise in workout.exercises %}
     <div class="card mb-3">
@@ -109,4 +134,5 @@
     </div>
 </div>
 
+<script src="{{ url_for('static', filename='js/timer.js') }}"></script>
 {% endblock %}
