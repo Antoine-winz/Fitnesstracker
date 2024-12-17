@@ -78,13 +78,6 @@ def rename_workout(workout_id):
         db.session.commit()
         return redirect(request.referrer or url_for('history'))
     return redirect(url_for('history'))
-        db.session.add(new_exercise)
-        for set in exercise.sets:
-            new_set = Set(reps=set.reps, weight=set.weight, exercise=new_exercise)
-            db.session.add(new_set)
-    
-    db.session.commit()
-    return redirect(url_for('view_workout', workout_id=new_workout.id))
 
 @app.route('/history')
 def history():
