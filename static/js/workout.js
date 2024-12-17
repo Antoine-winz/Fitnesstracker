@@ -24,9 +24,34 @@ document.addEventListener('DOMContentLoaded', function() {
     const exerciseModal = new bootstrap.Modal(document.getElementById('exerciseModal'));
     const setModal = new bootstrap.Modal(document.getElementById('setModal'));
     let currentExerciseId = null;
+    let currentCategory = 'all';
 
     if (addExerciseBtn) {
-        addExerciseBtn.addEventListener('click', () => {
+        addExerciseBtn.addEventListener('click', async () => {
+            // Fetch categories and populate filters when modal is opened
+            const response = await fetch('/api/exercises/categories');
+            if (response.ok) {
+                const categories = await response.json();
+                const filterContainer = document.getElementById('categoryFilters');
+                filterContainer.innerHTML = `
+                    <button type="button" class="btn btn-outline-primary btn-sm active" data-category="all">All</button>
+                    ${categories.map(category => 
+                        `<button type="button" class="btn btn-outline-primary btn-sm" data-category="${category}">${category}</button>`
+                    ).join('')}
+                `;
+                
+                // Add click handlers to filter buttons
+                filterContainer.querySelectorAll('button').forEach(btn => {
+                    btn.addEventListener('click', (e) => {
+                        filterContainer.querySelectorAll('button').forEach(b => b.classList.remove('active'));
+                        btn.classList.add('active');
+                        currentCategory = btn.dataset.category;
+                        // Trigger search with current input value
+                        const event = new Event('input');
+                        exerciseNameInput.dispatchEvent(event);
+                    });
+                });
+            }
             exerciseModal.show();
         });
     }
@@ -38,8 +63,8 @@ document.addEventListener('DOMContentLoaded', function() {
     if (exerciseNameInput) {
         exerciseNameInput.addEventListener('input', async (e) => {
             const query = e.target.value;
-            if (query.length >= 2) {
-                const response = await fetch(`/api/exercises/suggest?q=${encodeURIComponent(query)}`);
+            if (query.length >= 2 || currentCategory !== 'all') {
+                const response = await fetch(`/api/exercises/suggest?q=${encodeURIComponent(query)}&category=${encodeURIComponent(currentCategory)}`);
                 if (response.ok) {
                     const suggestions = await response.json();
                     exerciseList.innerHTML = suggestions

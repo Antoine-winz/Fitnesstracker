@@ -93,20 +93,30 @@ def rename_exercise(exercise_id):
         db.session.commit()
     return redirect(url_for('view_workout', workout_id=exercise.workout_id))
 
+@app.route('/api/exercises/categories', methods=['GET'])
+def get_categories():
+    categories = sorted(list(set(exercise['category'] for exercise in EXERCISE_LIST)))
+    return jsonify(categories)
+
 @app.route('/api/exercises/suggest', methods=['GET'])
 def suggest_exercises():
     query = request.args.get('q', '').lower()
+    category = request.args.get('category', 'all')
+    
     suggestions = []
     for exercise in EXERCISE_LIST:
-        if query in exercise['name'].lower():
-            # Format the suggestion to include the category
+        name_matches = query in exercise['name'].lower()
+        category_matches = category == 'all' or category == exercise['category']
+        
+        if (name_matches or not query) and category_matches:
             exercise_with_category = {
                 'name': exercise['name'],
                 'category': exercise['category'],
                 'display': f"{exercise['name']} ({exercise['category']})"
             }
             suggestions.append(exercise_with_category)
-    return jsonify(suggestions)
+    
+    return jsonify(suggestions[:20])
 
 @app.route('/exercise/<int:exercise_id>/delete', methods=['POST'])
 def delete_exercise(exercise_id):

@@ -47,3 +47,18 @@ datalist option {
     font-family: var(--bs-font-sans-serif);
     padding: 4px;
 }
+
+.muscle-group-filters {
+    max-height: 120px;
+    overflow-y: auto;
+}
+
+.muscle-group-filters .btn {
+    margin: 2px;
+    white-space: nowrap;
+}
+
+.muscle-group-filters .btn.active {
+    background-color: var(--bs-primary);
+    color: white;
+}
