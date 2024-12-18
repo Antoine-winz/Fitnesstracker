@@ -268,7 +268,7 @@ textarea {
     border-radius: 12px;
     border: 2px solid var(--border-light);
     background-color: #ffffff !important;
-    color: var(--text-primary);
+    color: #000000;
     font-weight: 500;
     transition: all var(--transition-speed);
 }
@@ -280,6 +280,10 @@ textarea {
 input::placeholder,
 textarea::placeholder {
     color: #666666 !important;
+}
+
+input, select, textarea {
+    color: #000000 !important;
 }
 
 input[type="number"]:focus,
