@@ -1,4 +1,11 @@
 class WorkoutTimer {
+// Haptic feedback utility
+function triggerHapticFeedback() {
+    if (navigator.vibrate) {
+        navigator.vibrate(50); // 50ms vibration
+    }
+}
+
     constructor() {
         this.minutes = 0;
         this.seconds = 0;
@@ -47,6 +54,7 @@ class WorkoutTimer {
 
     start() {
         if (!this.isRunning && this.totalSeconds > 0) {
+            triggerHapticFeedback();
             this.isRunning = true;
             this.interval = setInterval(() => {
                 if (this.totalSeconds > 0) {
@@ -64,6 +72,7 @@ class WorkoutTimer {
 
     pause() {
         if (this.isRunning) {
+            triggerHapticFeedback();
             clearInterval(this.interval);
             this.isRunning = false;
             this.startButton.disabled = false;
@@ -71,6 +80,7 @@ class WorkoutTimer {
     }
 
     reset() {
+        triggerHapticFeedback();
         this.pause();
         this.updateFromInput();
         this.startButton.disabled = false;

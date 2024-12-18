@@ -1,4 +1,11 @@
 function renameExercise(exerciseId, currentName) {
+// Haptic feedback utility
+function triggerHapticFeedback() {
+    if (navigator.vibrate) {
+        navigator.vibrate(50); // 50ms vibration
+    }
+}
+
     const modal = new bootstrap.Modal(document.getElementById('exerciseRenameModal'));
     const form = document.getElementById('exerciseRenameForm');
     const input = document.getElementById('newExerciseName');
@@ -28,6 +35,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
     if (addExerciseBtn) {
         addExerciseBtn.addEventListener('click', async () => {
+        triggerHapticFeedback();
             // Fetch categories and populate filters when modal is opened
             const response = await fetch('/api/exercises/categories');
             if (response.ok) {
@@ -77,6 +85,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // Save Exercise
     document.getElementById('saveExercise')?.addEventListener('click', async () => {
+        triggerHapticFeedback();
         const exerciseName = document.getElementById('exerciseName').value;
         const workoutId = window.location.pathname.split('/').pop();
 
@@ -106,6 +115,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // Save Set
     document.getElementById('saveSet')?.addEventListener('click', async () => {
+        triggerHapticFeedback();
         const reps = document.getElementById('reps').value;
         const weight = document.getElementById('weight').value;
 
