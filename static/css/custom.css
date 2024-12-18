@@ -413,3 +413,7 @@ form + form {
     font-weight: 600;
     letter-spacing: -0.02em;
 }
+
+.text-muted {
+    color: #000000;
+}
