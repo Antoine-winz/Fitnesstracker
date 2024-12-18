@@ -41,7 +41,7 @@ h1, h2, h3, h4, h5, h6 {
 .tip-box {
     background-color: var(--bg-secondary);
     border-radius: var(--border-radius-lg);
-    padding: 1.5rem 2rem;
+    padding: 1rem;
     text-align: center;
     box-shadow: var(--card-shadow);
     max-width: 600px;
@@ -49,17 +49,10 @@ h1, h2, h3, h4, h5, h6 {
     border: 1px solid var(--border-light);
 }
 
-.tip-header {
-    color: var(--text-primary);
-    font-size: 1.25rem;
-    margin-bottom: 0.75rem;
-    font-weight: 600;
-}
-
 .tip-text {
     color: var(--text-secondary);
-    font-size: 1.1rem;
-    line-height: 1.6;
+    font-size: 0.95rem;
+    line-height: 1.4;
     margin: 0;
 }
 
