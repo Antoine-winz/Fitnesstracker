@@ -50,9 +50,35 @@ h1, h2, h3, h4, h5, h6 {
     background-color: var(--bg-light);
     border-bottom: 1px solid var(--border-light);
     padding: var(--spacing-md) var(--spacing-md);
+}
+
+.card-header .d-flex {
     display: flex;
     align-items: center;
-    justify-content: space-between;
+    gap: 1rem;
+}
+
+.card-header .btn-group {
+    display: flex;
+    gap: 0.5rem;
+    flex-wrap: nowrap;
+}
+
+@media (max-width: 576px) {
+    .card-header .d-flex {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 0.75rem;
+    }
+    
+    .card-header .btn-group {
+        width: 100%;
+        justify-content: space-between;
+    }
+    
+    .card-header .btn {
+        flex: 1;
+    }
 }
 
 .card-body {
@@ -116,9 +142,14 @@ h1, h2, h3, h4, h5, h6 {
     background-color: var(--bg-secondary);
     border: 1px solid var(--border-light);
     display: flex;
-    flex-wrap: wrap;
-    gap: 0.75rem;
     align-items: center;
+    justify-content: space-between;
+}
+
+.set-row .btn-group {
+    display: flex;
+    gap: 0.5rem;
+    margin-left: auto;
 }
 
 @media (max-width: 576px) {
@@ -316,11 +347,30 @@ datalist {
 }
 
 .timer-controls {
+    display: flex;
+    justify-content: center;
+    gap: 1rem;
     margin: 2rem 0;
 }
 
 .timer-controls .btn {
-    min-width: 80px;
+    min-width: 100px;
+    flex: 1;
+    max-width: 160px;
+}
+
+.add-set-btn {
+    width: 100%;
+    margin-top: var(--spacing-md);
+    padding: 1rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+}
+
+.add-set-btn i {
+    font-size: 1.2em;
 }
 
 @media (max-width: 576px) {
