@@ -21,20 +21,22 @@ def parse_exercise_list():
             elif re.match(r'^\d+\.', line):
                 exercise_name = re.sub(r'^\d+\.\s*', '', line.strip())
                 if exercise_name:
-                    # Map the original category to the new simplified categories
-                    if any(category.lower() in current_category.lower() for category in upper_body):
-                        simplified_category = "Upper Body"
-                    elif any(category.lower() in current_category.lower() for category in core):
+                    # Map everything to either Upper Body, Core, or Lower Body
+                    if any(category.lower() in current_category.lower() for category in core):
                         simplified_category = "Core"
                     elif any(category.lower() in current_category.lower() for category in lower_body):
                         simplified_category = "Lower Body"
                     else:
-                        simplified_category = "Other"
+                        # Everything else goes to Upper Body
+                        simplified_category = "Upper Body"
                         
                     exercises.append({
-                        'name': exercise_name,
+                        'name': exercise_name.strip(),
                         'category': simplified_category
                     })
+    
+    # Sort exercises alphabetically within each category
+    exercises.sort(key=lambda x: x['name'])
     return exercises
 
 EXERCISE_LIST = parse_exercise_list()
