@@ -24,11 +24,21 @@ h1, h2, h3, h4, h5, h6 {
 .card-header {
     background-color: rgba(0, 0, 0, 0.2);
     border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-    padding: 1rem 1.25rem;
+    padding: 1rem;
 }
 
 .card-body {
-    padding: 1.25rem;
+    padding: 1rem;
+}
+
+@media (min-width: 768px) {
+    .card-header {
+        padding: 1rem 1.25rem;
+    }
+    
+    .card-body {
+        padding: 1.25rem;
+    }
 }
 
 .card-title {
@@ -51,20 +61,43 @@ h1, h2, h3, h4, h5, h6 {
 
 .set-row {
     margin-bottom: 0.75rem;
-    padding: 0.5rem;
-    border-radius: 6px;
+    padding: 0.75rem;
+    border-radius: 8px;
     background-color: rgba(255, 255, 255, 0.05);
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    align-items: center;
+}
+
+@media (max-width: 576px) {
+    .set-row {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 0.75rem;
+    }
+    
+    .set-row form {
+        width: 100%;
+    }
+    
+    .set-row .btn {
+        width: 100%;
+        margin: 0.25rem 0;
+    }
 }
 
 .set-number {
     font-weight: 600;
     margin-right: 1rem;
     color: var(--bs-primary);
+    min-width: 4rem;
 }
 
 .set-details {
     color: var(--bs-secondary-color);
     font-size: 0.95rem;
+    flex: 1;
 }
 
 /* Exercise Summary */
@@ -80,18 +113,13 @@ h1, h2, h3, h4, h5, h6 {
     border: 1px solid rgba(255, 255, 255, 0.1);
     background-color: var(--bs-dark);
     position: relative;
+    font-size: 16px; /* Prevent zoom on mobile */
 }
 
-#exerciseList {
-    position: absolute;
-    width: 100%;
-    max-height: 200px;
-    overflow-y: auto;
-    z-index: 1050;
-    background-color: var(--bs-dark);
-    border: 1px solid rgba(255, 255, 255, 0.1);
-    border-radius: 8px;
-    margin-top: 4px;
+input[type="number"],
+input[type="text"] {
+    font-size: 16px; /* Prevent zoom on mobile */
+    height: 44px; /* Minimum touch target size */
 }
 
 .modal-content {
@@ -163,8 +191,29 @@ datalist {
     color: var(--bs-primary);
 }
 
+@media (max-width: 576px) {
+    .timer-display {
+        font-size: 2.5rem;
+    }
+}
+
 .timer-controls {
     margin: 1.5rem 0;
+}
+
+.timer-controls .btn {
+    min-width: 80px;
+}
+
+@media (max-width: 576px) {
+    .timer-controls .btn {
+        min-width: 100%;
+        margin-bottom: 0.5rem;
+    }
+    
+    .timer-controls .d-flex {
+        flex-direction: column;
+    }
 }
 
 .timer-settings input {
@@ -173,17 +222,55 @@ datalist {
     border-radius: 8px;
     border: 1px solid rgba(255, 255, 255, 0.1);
     background-color: var(--bs-dark);
+    font-size: 16px;
+    height: 44px;
+}
+
+@media (max-width: 576px) {
+    .timer-settings .row {
+        gap: 0.75rem;
+    }
 }
 
 /* Buttons */
 .btn {
-    padding: 0.5rem 1rem;
+    padding: 0.75rem 1rem;
     font-weight: 500;
     border-radius: 8px;
+    min-height: 44px; /* Minimum touch target size */
+}
+
+@media (max-width: 576px) {
+    .btn {
+        padding: 0.875rem 1rem;
+    }
+    
+    .btn-sm {
+        padding: 0.75rem 0.875rem;
+    }
 }
 
 .btn-primary {
     box-shadow: 0 2px 4px rgba(var(--bs-primary-rgb), 0.3);
+}
+
+/* Improved spacing for button groups on mobile */
+.btn + .btn,
+form + form {
+    margin-left: 0.5rem;
+}
+
+@media (max-width: 576px) {
+    .btn + .btn,
+    form + form {
+        margin-left: 0;
+        margin-top: 0.5rem;
+    }
+    
+    .d-flex {
+        flex-wrap: wrap;
+        gap: 0.5rem;
+    }
 }
 
 /* Tables */
