@@ -304,6 +304,12 @@ datalist {
     transition: border-color var(--transition-speed);
 }
 
+.timer-settings .form-label {
+    text-align: center;
+    width: 100%;
+    display: block;
+}
+
 .timer-settings input:focus {
     border-color: var(--neon-green);
     box-shadow: 0 0 0 4px rgba(57, 255, 20, 0.1);
