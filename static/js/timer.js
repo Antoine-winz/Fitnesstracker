@@ -1,11 +1,12 @@
-class WorkoutTimer {
-// Haptic feedback utility
+
+// Utility function for haptic feedback
 function triggerHapticFeedback() {
     if (navigator.vibrate) {
         navigator.vibrate(50); // 50ms vibration
     }
 }
 
+class WorkoutTimer {
     constructor() {
         this.minutes = 0;
         this.seconds = 0;
