@@ -45,9 +45,6 @@
     {% for exercise in workout.exercises %}
     <div class="card mb-3">
         <div class="card-header">
-            <div class="text-center mb-3">
-                <h5 class="card-title">{{ exercise.name }}</h5>
-            </div>
             <div class="row g-2 justify-content-center">
                 <div class="col-12 col-sm-6 text-center">
                     <a href="{{ url_for('exercise_progress', exercise_name=exercise.name) }}" class="btn btn-outline-primary btn-sm w-100">
