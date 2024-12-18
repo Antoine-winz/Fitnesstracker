@@ -138,6 +138,23 @@ h1, h2, h3, h4, h5, h6 {
     }
 }
 
+@media (max-width: 576px) {
+    .set-row {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 0.75rem;
+    }
+    
+    .set-row form {
+        width: 100%;
+    }
+    
+    .set-row .btn {
+        width: 100%;
+        margin: 0.25rem 0;
+    }
+}
+
 .set-number {
     font-weight: 700;
     margin-right: 1rem;
@@ -360,6 +377,8 @@ datalist {
     align-items: center;
     justify-content: center;
     gap: 0.5rem;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    transform: translateY(0);
 }
 
 .btn-primary {
@@ -384,6 +403,35 @@ datalist {
 .btn-danger {
     background-color: #dc3545;
     color: white;
+}
+
+.btn-outline-primary {
+    border: 2px solid var(--neon-green);
+    color: #000000;
+}
+
+.btn-outline-primary:hover {
+    background-color: var(--neon-green);
+    color: #000000;
+}
+
+/* Improved spacing for button groups on mobile */
+.btn + .btn,
+form + form {
+    margin-left: 0.5rem;
+}
+
+@media (max-width: 576px) {
+    .btn + .btn,
+    form + form {
+        margin-left: 0;
+        margin-top: 0.5rem;
+    }
+    
+    .d-flex {
+        flex-wrap: wrap;
+        gap: 0.5rem;
+    }
 }
 
 .btn-outline-primary {
