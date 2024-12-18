@@ -7,19 +7,32 @@ import re
 
 def parse_exercise_list():
     exercises = []
+    upper_body = ["Chest", "Back", "Shoulders", "Arms", "Upper Body"]
+    core = ["Core", "Abs", "Obliques"]
+    lower_body = ["Legs", "Lower Body", "Glutes", "Calves"]
+    
     current_category = None
     with open('Pasted-Here-s-a-comprehensive-list-of-250-common-exercises-categorized-by-body-region-to-ensure-a-full-bo-1734470713381.txt', 'r') as f:
         for line in f:
             line = line.strip()
             if line.startswith('####'):
-                # Remove asterisks and clean up the category name
                 current_category = line.replace('#', '').replace('*', '').strip()
             elif re.match(r'^\d+\.', line):
                 exercise_name = re.sub(r'^\d+\.\s*', '', line.strip())
                 if exercise_name:
+                    # Map the original category to the new simplified categories
+                    if any(category in current_category for category in upper_body):
+                        simplified_category = "Upper Body"
+                    elif any(category in current_category for category in core):
+                        simplified_category = "Core"
+                    elif any(category in current_category for category in lower_body):
+                        simplified_category = "Lower Body"
+                    else:
+                        simplified_category = "Other"
+                        
                     exercises.append({
                         'name': exercise_name,
-                        'category': current_category
+                        'category': simplified_category
                     })
     return exercises
 
