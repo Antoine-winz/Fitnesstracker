@@ -63,6 +63,7 @@ h1, h2, h3, h4, h5, h6 {
     font-size: 1.25rem;
     font-weight: 600;
     margin-bottom: 0;
+    color: var(--text-primary);
 }
 
 /* Exercise Items */
@@ -73,6 +74,12 @@ h1, h2, h3, h4, h5, h6 {
     background-color: var(--bg-light);
     border: 1px solid var(--border-light);
     box-shadow: var(--card-shadow);
+    color: var(--text-primary);
+}
+
+.exercise-item h5 {
+    color: var(--text-primary);
+    font-weight: 600;
 }
 
 .exercise-item strong {
@@ -192,20 +199,34 @@ input[type="text"]:focus {
     max-height: 60vh;
     overflow-y: auto;
     position: relative;
+    background-color: var(--bg-light);
+    color: var(--text-primary);
+}
+
+.modal-header {
+    background-color: var(--bg-light);
+    color: var(--text-primary);
+    border-bottom: 1px solid var(--border-light);
+}
+
+.modal-title {
+    color: var(--text-primary);
+    font-weight: 600;
 }
 
 datalist {
     max-height: 200px;
     overflow-y: auto;
+    color: var(--text-primary);
 }
 
 .modal-footer {
     position: sticky;
     bottom: 0;
-    background: var(--bs-dark);
+    background-color: var(--bg-light);
     z-index: 1000;
     padding: 1rem;
-    border-top: 1px solid rgba(255, 255, 255, 0.1);
+    border-top: 1px solid var(--border-light);
 }
 
 #exerciseName::-webkit-calendar-picker-indicator {
