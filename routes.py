@@ -1,3 +1,4 @@
+
 from flask import render_template, request, redirect, url_for, jsonify
 from app import app, db
 from models import Workout, Exercise, Set
@@ -8,24 +9,24 @@ import re
 def parse_exercise_list():
     exercises = []
     upper_body = ["Chest", "Back", "Shoulders", "Arms", "Upper Body"]
-    core = ["Core", "Abs", "Obliques"]
-    lower_body = ["Legs", "Lower Body", "Glutes", "Calves"]
+    core = ["Core", "Abs", "Obliques", "Lower Back"]
+    lower_body = ["Legs", "Lower Body", "Glutes", "Calves", "Quads", "Hamstrings"]
     
     current_category = None
-    with open('Pasted-Here-s-a-comprehensive-list-of-250-common-exercises-categorized-by-body-region-to-ensure-a-full-bo-1734470713381.txt', 'r') as f:
+    with open('Pasted-Here-s-the-simplified-list-of-Upper-Body-Core-and-Lower-Body-exercises-categorized-an-1734558777240.txt', 'r') as f:
         for line in f:
             line = line.strip()
-            if line.startswith('####'):
+            if line.startswith('####') or line.startswith('###'):
                 current_category = line.replace('#', '').replace('*', '').strip()
             elif re.match(r'^\d+\.', line):
                 exercise_name = re.sub(r'^\d+\.\s*', '', line.strip())
                 if exercise_name:
                     # Map the original category to the new simplified categories
-                    if any(category in current_category for category in upper_body):
+                    if any(category.lower() in current_category.lower() for category in upper_body):
                         simplified_category = "Upper Body"
-                    elif any(category in current_category for category in core):
+                    elif any(category.lower() in current_category.lower() for category in core):
                         simplified_category = "Core"
-                    elif any(category in current_category for category in lower_body):
+                    elif any(category.lower() in current_category.lower() for category in lower_body):
                         simplified_category = "Lower Body"
                     else:
                         simplified_category = "Other"
@@ -196,7 +197,6 @@ def rename_workout(workout_id):
 @app.route('/exercise/progress/<exercise_name>')
 def exercise_progress(exercise_name):
     try:
-        # Get all exercises with this name
         exercises = Exercise.query.filter(Exercise.name == exercise_name)\
             .join(Workout)\
             .order_by(Workout.date.desc())\
@@ -205,7 +205,6 @@ def exercise_progress(exercise_name):
         if not exercises:
             return redirect(url_for('index'))
         
-        # Calculate statistics
         history = []
         for exercise in exercises:
             if exercise.sets:
@@ -225,33 +224,4 @@ def exercise_progress(exercise_name):
                              history=history if history else None)
     except Exception as e:
         app.logger.error(f"Error in exercise_progress: {str(e)}")
-@app.route('/progress')
-def progress():
-    try:
-        # Get all unique exercise names from the database
-        exercises = db.session.query(Exercise.name)\
-            .distinct()\
-            .order_by(Exercise.name)\
-            .all()
-        
-        # Extract exercise names from query result
-        exercise_names = [exercise[0] for exercise in exercises]
-        
-        # Group exercises by their categories using the EXERCISE_LIST
-        categorized_exercises = {}
-        for exercise_name in exercise_names:
-            # Find the category for this exercise
-            matching_exercises = [ex for ex in EXERCISE_LIST if ex['name'] == exercise_name]
-            category = matching_exercises[0]['category'] if matching_exercises else 'Other'
-            
-            if category not in categorized_exercises:
-                categorized_exercises[category] = []
-            categorized_exercises[category].append(exercise_name)
-        
-        return render_template('progress.html', 
-                            categorized_exercises=categorized_exercises)
-    except Exception as e:
-        app.logger.error(f"Error in progress page: {str(e)}")
-        return "An error occurred while loading the progress page", 500
-
         return "An error occurred while loading exercise progress", 500
