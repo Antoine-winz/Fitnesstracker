@@ -29,6 +29,50 @@ body {
 
 h1, h2, h3, h4, h5, h6 {
     font-weight: 700;
+
+/* Tip Styles */
+.tip-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 1rem;
+}
+
+.tip-box {
+    background-color: var(--bg-secondary);
+    border-radius: var(--border-radius-lg);
+    padding: 1.5rem 2rem;
+    text-align: center;
+    box-shadow: var(--card-shadow);
+    max-width: 600px;
+    width: 100%;
+    border: 1px solid var(--border-light);
+}
+
+.tip-header {
+    color: var(--text-primary);
+    font-size: 1.25rem;
+    margin-bottom: 0.75rem;
+    font-weight: 600;
+}
+
+.tip-text {
+    color: var(--text-secondary);
+    font-size: 1.1rem;
+    line-height: 1.6;
+    margin: 0;
+}
+
+@media (max-width: 576px) {
+    .tip-box {
+        padding: 1rem;
+    }
+    
+    .tip-text {
+        font-size: 1rem;
+    }
+}
+
     letter-spacing: -0.03em;
     margin-bottom: 1.25rem;
     color: var(--text-primary);

@@ -41,9 +41,13 @@ def parse_exercise_list():
 
 EXERCISE_LIST = parse_exercise_list()
 
+import random
+from fitness_tips import TIPS
+
 @app.route('/')
 def index():
-    return render_template('index.html')
+    tip = random.choice(TIPS)
+    return render_template('index.html', tip=tip)
 
 @app.route('/workout/new', methods=['GET', 'POST'])
 def add_workout():
@@ -161,7 +165,8 @@ def delete_set(set_id):
 @app.route('/history')
 def history():
     workouts = Workout.query.order_by(Workout.date.desc()).all()
-    return render_template('history.html', workouts=workouts)
+    tip = random.choice(TIPS)
+    return render_template('history.html', workouts=workouts, tip=tip)
 
 @app.route('/workout/<int:workout_id>/delete', methods=['POST'])
 def delete_workout(workout_id):
