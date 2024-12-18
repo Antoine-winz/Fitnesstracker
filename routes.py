@@ -194,6 +194,26 @@ def rename_workout(workout_id):
         return redirect(request.referrer or url_for('history'))
     return redirect(url_for('history'))
 
+@app.route('/progress')
+def progress():
+    try:
+        exercises = Exercise.query.with_entities(Exercise.name).distinct().all()
+        exercise_names = [exercise[0] for exercise in exercises]
+        
+        categorized_exercises = {}
+        for exercise_name in exercise_names:
+            matching_exercises = [ex for ex in EXERCISE_LIST if ex['name'] == exercise_name]
+            category = matching_exercises[0]['category'] if matching_exercises else 'Other'
+            
+            if category not in categorized_exercises:
+                categorized_exercises[category] = []
+            categorized_exercises[category].append(exercise_name)
+        
+        return render_template('progress.html', categorized_exercises=categorized_exercises)
+    except Exception as e:
+        app.logger.error(f"Error in progress page: {str(e)}")
+        return "An error occurred while loading the progress page", 500
+
 @app.route('/exercise/progress/<exercise_name>')
 def exercise_progress(exercise_name):
     try:
