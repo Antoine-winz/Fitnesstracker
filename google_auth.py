@@ -25,33 +25,39 @@ def get_google_client():
     return WebApplicationClient(client_id)
 
 def get_callback_url():
-    if os.environ.get('REPLIT_DEV_DOMAIN'):
-        domain = os.environ.get('REPLIT_DEV_DOMAIN')
-    else:
-        domain = request.host
-    return f"https://{domain}/google_login/callback"
+    """Get the callback URL for Google OAuth"""
+    if not os.environ.get("REPLIT_DEV_DOMAIN"):
+        raise RuntimeError(
+            "REPLIT_DEV_DOMAIN environment variable is not set. "
+            "Please ensure you are running this on Replit."
+        )
+    return url_for("google_auth.callback", _external=True, _scheme="https")
 
 # Print setup instructions
-callback_url = get_callback_url()
-print(f"""To make Google authentication work:
+print("""To make Google authentication work:
 1. Go to https://console.cloud.google.com/apis/credentials
 2. Create a new OAuth 2.0 Client ID
-3. Add {callback_url} to Authorized redirect URIs
+3. Add your callback URL (<your-repl-domain>/google_login/callback) to Authorized redirect URIs
 4. Set GOOGLE_OAUTH_CLIENT_ID and GOOGLE_OAUTH_CLIENT_SECRET in your Repl's Secrets tab""")
 
 @google_auth.route("/google_login")
 def login():
+    """Initiate Google OAuth login flow"""
     try:
+        from app import db  # Import here to avoid circular imports
+        
+        if not os.environ.get("GOOGLE_OAUTH_CLIENT_ID") or not os.environ.get("GOOGLE_OAUTH_CLIENT_SECRET"):
+            raise RuntimeError("Google OAuth credentials not configured")
+            
         # Get Google provider configuration
         google_provider_cfg = get_google_provider_cfg()
         authorization_endpoint = google_provider_cfg["authorization_endpoint"]
         
-        # Get the callback URL
-        callback_url = get_callback_url()
-        print(f"OAuth Debug - Callback URL: {callback_url}")
-        
-        # Create OAuth 2 client
+        # Create OAuth 2 client and get callback URL
         client = get_google_client()
+        callback_url = get_callback_url()
+        
+        print(f"OAuth Debug - Starting login for callback URL: {callback_url}")
         
         # Prepare the request URI
         request_uri = client.prepare_request_uri(
@@ -59,10 +65,13 @@ def login():
             redirect_uri=callback_url,
             scope=["openid", "email", "profile"],
         )
+        
+        print(f"OAuth Debug - Authorization URL generated successfully")
         return redirect(request_uri)
+        
     except Exception as e:
-        print(f"Error in login route: {str(e)}")
-        return "Failed to initialize Google login. Please ensure OAuth credentials are properly configured.", 500
+        print(f"OAuth Error - Login failed: {str(e)}")
+        return "Failed to initialize Google login. Please check the application logs and ensure OAuth credentials are properly configured.", 500
 
 @google_auth.route("/google_login/callback")
 def callback():
@@ -153,5 +162,11 @@ def callback():
 @google_auth.route("/logout")
 @login_required
 def logout():
-    logout_user()
-    return redirect(url_for("index"))
+    try:
+        print(f"Logout - Processing logout for user: {current_user.email if current_user else 'Unknown'}")
+        logout_user()
+        print("Logout - User session terminated successfully")
+        return redirect(url_for("index"))
+    except Exception as e:
+        print(f"Logout Error: {str(e)}")
+        return redirect(url_for("index"))

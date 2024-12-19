@@ -9,13 +9,23 @@ app = Flask(__name__)
 
 # Configure app
 app.secret_key = os.environ.get("FLASK_SECRET_KEY") or os.urandom(24)
-app.config["SQLALCHEMY_DATABASE_URI"] = os.environ.get("DATABASE_URL")
-app.config["SQLALCHEMY_ENGINE_OPTIONS"] = {
-    "pool_recycle": 300,
-    "pool_pre_ping": True,
-}
-app.config["SESSION_COOKIE_SECURE"] = True
-app.config["SESSION_COOKIE_HTTPONLY"] = True
+app.config.update(
+    SQLALCHEMY_DATABASE_URI=os.environ.get("DATABASE_URL"),
+    SQLALCHEMY_ENGINE_OPTIONS={
+        "pool_recycle": 300,
+        "pool_pre_ping": True,
+    },
+    SESSION_COOKIE_SECURE=True,
+    SESSION_COOKIE_HTTPONLY=True,
+    SESSION_COOKIE_SAMESITE="Lax",
+    REMEMBER_COOKIE_SECURE=True,
+    REMEMBER_COOKIE_HTTPONLY=True,
+    PREFERRED_URL_SCHEME="https"  # Force HTTPS for URL generation
+)
+
+# Ensure HTTPS for all redirects
+if os.environ.get("REPLIT_DEV_DOMAIN"):
+    app.config["SERVER_NAME"] = os.environ.get("REPLIT_DEV_DOMAIN")
 
 # Initialize SQLAlchemy with custom base
 class Base(DeclarativeBase):
