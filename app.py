@@ -10,12 +10,16 @@ class Base(DeclarativeBase):
 db = SQLAlchemy(model_class=Base)
 app = Flask(__name__)
 
-app.secret_key = os.environ.get("FLASK_SECRET_KEY") or "a secret key"
+app.secret_key = os.environ.get("FLASK_SECRET_KEY", os.urandom(24))
 app.config["SQLALCHEMY_DATABASE_URI"] = os.environ.get("DATABASE_URL")
 app.config["SQLALCHEMY_ENGINE_OPTIONS"] = {
     "pool_recycle": 300,
     "pool_pre_ping": True,
 }
+# Enable HTTPS redirect for OAuth
+app.config["PREFERRED_URL_SCHEME"] = "https"
+app.config["SESSION_COOKIE_SECURE"] = True
+app.config["SESSION_COOKIE_SAMESITE"] = "None"
 
 db.init_app(app)
 
