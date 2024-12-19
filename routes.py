@@ -46,10 +46,11 @@ import random
 from fitness_tips import TIPS
 
 @app.route('/')
+@app.route('/index')
 def index():
-    tip = random.choice(TIPS)
     if not current_user.is_authenticated:
         return render_template('login.html')
+    tip = random.choice(TIPS)
     return render_template('index.html', tip=tip)
 
 @app.route('/workout/new', methods=['GET', 'POST'])
