@@ -27,6 +27,7 @@ def login():
     
     # Construct the callback URL using the REPLIT_DEV_DOMAIN
     callback_url = f"https://{os.environ.get('REPLIT_DEV_DOMAIN')}/google_login/callback"
+    print(f"OAuth Debug - Callback URL: {callback_url}")
     
     request_uri = client.prepare_request_uri(
         authorization_endpoint,
@@ -48,9 +49,14 @@ def callback():
     # Use the same callback URL as in the login route
     callback_url = f"https://{os.environ.get('REPLIT_DEV_DOMAIN')}/google_login/callback"
 
+    # Ensure the authorization response URL uses HTTPS
+    full_callback_url = request.url
+    if full_callback_url.startswith('http://'):
+        full_callback_url = full_callback_url.replace('http://', 'https://', 1)
+    
     token_url, headers, body = client.prepare_token_request(
         token_endpoint,
-        authorization_response=request.url.replace("http://", "https://"),
+        authorization_response=full_callback_url,
         redirect_url=callback_url,
         code=code,
     )
