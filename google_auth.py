@@ -33,7 +33,10 @@ def get_callback_url():
             "Please ensure you are running this on Replit."
         )
     callback_url = f"https://{domain}/google_login/callback"
-    print(f"OAuth Debug - Generated callback URL: {callback_url}")
+    # Print the exact URL that needs to be registered in Google Cloud Console
+    print("\nIMPORTANT: Add this exact URL to Google Cloud Console OAuth 2.0 Client ID configuration:")
+    print(f"Authorized redirect URI: {callback_url}")
+    print("\nMake sure it matches exactly, including https:// and no trailing slash\n")
     return callback_url
 
 # Print setup instructions
@@ -54,23 +57,34 @@ def login():
         google_provider_cfg = get_google_provider_cfg()
         authorization_endpoint = google_provider_cfg["authorization_endpoint"]
         
-        # Get the callback URL
+        # Get the callback URL and print it for verification
         callback_url = get_callback_url()
         
         # Create OAuth 2 client
         client = get_google_client()
         
-        # Prepare the request URI
+        # Prepare the request URI with explicit parameters
         request_uri = client.prepare_request_uri(
             authorization_endpoint,
             redirect_uri=callback_url,
             scope=["openid", "email", "profile"],
+            access_type="offline",
+            prompt="consent"
         )
         
+        print(f"OAuth Debug - Starting authentication with callback URL: {callback_url}")
         return redirect(request_uri)
     except Exception as e:
-        print(f"OAuth Error - Login failed: {str(e)}")
-        return "Failed to initialize Google login. Please check the application logs.", 500
+        error_msg = str(e)
+        print(f"OAuth Error - Login failed: {error_msg}")
+        if "redirect_uri_mismatch" in error_msg.lower():
+            return """
+                Error: Redirect URI Mismatch. Please ensure you have:
+                1. Added the exact callback URL shown in the logs to Google Cloud Console
+                2. Waited a few minutes for Google's settings to update
+                3. Check that there are no trailing slashes or extra characters
+            """, 500
+        return f"Failed to initialize Google login: {error_msg}", 500
 
 @google_auth.route("/google_login/callback")
 def callback():
@@ -101,12 +115,18 @@ def callback():
         )
 
         # Get access token
+        client_id = os.environ.get("GOOGLE_OAUTH_CLIENT_ID")
+        client_secret = os.environ.get("GOOGLE_OAUTH_CLIENT_SECRET")
+        
+        if not client_id or not client_secret:
+            print("OAuth Error - Missing client credentials")
+            return "Missing OAuth credentials", 500
+            
         token_response = requests.post(
             token_url,
             headers=headers,
             data=body,
-            auth=(os.environ.get("GOOGLE_OAUTH_CLIENT_ID"),
-                  os.environ.get("GOOGLE_OAUTH_CLIENT_SECRET"))
+            auth=(client_id, client_secret)
         )
 
         # Check token response
