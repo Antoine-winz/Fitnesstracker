@@ -128,24 +128,24 @@ def callback():
                     email=users_email
                 )
                 db.session.add(user)
-                db.session.commit()
-                print(f"Created new user: {users_email}")
+                try:
+                    db.session.commit()
+                    print(f"Created new user: {users_email}")
+                except Exception as e:
+                    print(f"Error creating user: {str(e)}")
+                    db.session.rollback()
+                    return "Failed to create user profile", 500
             
-            # Ensure user exists before login
-            if user is None:
-                raise Exception("Failed to create/retrieve user")
-            
-            # Log in the user and create session
+            # Log in the user
             login_user(user)
             print(f"Successfully logged in user: {users_email}")
             
-            # Redirect to index page
-            return redirect(url_for('index'))
+            # Explicitly return to the index route
+            return redirect(url_for('index', _external=True))
             
         except Exception as e:
-            print(f"Error creating/logging in user: {str(e)}")
-            db.session.rollback()
-            return "Failed to create user profile. Please try again.", 500
+            print(f"Error in user creation/login: {str(e)}")
+            return "Authentication failed. Please try again.", 500
     except Exception as e:
         print(f"Error in callback route: {str(e)}")
         return "Failed to process Google login callback. Please try again.", 500
