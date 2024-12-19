@@ -24,10 +24,13 @@ print(f"""To make Google authentication work:
 def login():
     google_provider_cfg = requests.get(GOOGLE_DISCOVERY_URL).json()
     authorization_endpoint = google_provider_cfg["authorization_endpoint"]
-
+    
+    # Construct the callback URL using the REPLIT_DEV_DOMAIN
+    callback_url = f"https://{os.environ.get('REPLIT_DEV_DOMAIN')}/google_login/callback"
+    
     request_uri = client.prepare_request_uri(
         authorization_endpoint,
-        redirect_uri=request.base_url.replace("http://", "https://") + "/callback",
+        redirect_uri=callback_url,
         scope=["openid", "email", "profile"],
     )
     return redirect(request_uri)
@@ -41,11 +44,14 @@ def callback():
     code = request.args.get("code")
     google_provider_cfg = requests.get(GOOGLE_DISCOVERY_URL).json()
     token_endpoint = google_provider_cfg["token_endpoint"]
+    
+    # Use the same callback URL as in the login route
+    callback_url = f"https://{os.environ.get('REPLIT_DEV_DOMAIN')}/google_login/callback"
 
     token_url, headers, body = client.prepare_token_request(
         token_endpoint,
         authorization_response=request.url.replace("http://", "https://"),
-        redirect_url=request.base_url.replace("http://", "https://"),
+        redirect_url=callback_url,
         code=code,
     )
     token_response = requests.post(
