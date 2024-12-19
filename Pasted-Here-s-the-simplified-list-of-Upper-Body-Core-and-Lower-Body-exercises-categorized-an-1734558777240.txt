@@ -1,0 +1,177 @@
+Here's the simplified list of **Upper Body**, **Core**, and **Lower Body** exercises, categorized and formatted for a fitness app.
+
+---
+
+## **Upper Body Exercises**
+
+### **Chest**
+1. Push-Ups  
+2. Incline Push-Ups  
+3. Decline Push-Ups  
+4. Diamond Push-Ups  
+5. Archer Push-Ups  
+6. Chest Dips  
+7. Bench Press  
+8. Incline Bench Press  
+9. Decline Bench Press  
+10. Dumbbell Flyes  
+11. Cable Chest Flyes  
+12. Pec Deck Machine  
+13. Svend Press  
+14. Dumbbell Pullovers  
+15. Wide Push-Ups  
+
+### **Back**
+16. Pull-Ups  
+17. Chin-Ups  
+18. Lat Pulldowns  
+19. Inverted Rows  
+20. Barbell Rows  
+21. Dumbbell Rows  
+22. Seated Cable Rows  
+23. T-Bar Rows  
+24. Single-Arm Cable Rows  
+25. Face Pulls  
+26. Reverse Flyes  
+27. Superman Exercise  
+28. Deadlifts  
+29. Rack Pulls  
+30. Renegade Rows  
+
+### **Shoulders**
+31. Overhead Press  
+32. Dumbbell Shoulder Press  
+33. Arnold Press  
+34. Lateral Raises  
+35. Front Raises  
+36. Rear Delt Flyes  
+37. Upright Rows  
+38. Shrugs  
+39. Pike Push-Ups  
+40. Handstand Push-Ups  
+41. Cable Lateral Raises  
+42. Seated Military Press  
+43. Barbell Front Raises  
+44. Dumbbell Y Raises  
+45. Plate Raises  
+
+### **Arms**
+#### **Biceps**
+46. Barbell Curls  
+47. Dumbbell Curls  
+48. Hammer Curls  
+49. Preacher Curls  
+50. Concentration Curls  
+51. Cable Curls  
+52. Chin-Ups (Bicep Focus)  
+53. Incline Dumbbell Curls  
+54. Zottman Curls  
+55. Resistance Band Curls  
+
+#### **Triceps**
+56. Tricep Dips  
+57. Close-Grip Bench Press  
+58. Skull Crushers  
+59. Tricep Pushdowns  
+60. Overhead Tricep Extension  
+61. Dumbbell Kickbacks  
+62. Diamond Push-Ups  
+63. Bench Dips  
+64. Cable Overhead Extensions  
+65. Reverse Grip Pushdowns  
+
+---
+
+## **Core Exercises**
+
+### **Abdominals**
+1. Crunches  
+2. Sit-Ups  
+3. Bicycle Crunches  
+4. Leg Raises  
+5. Hanging Leg Raises  
+6. Flutter Kicks  
+7. Plank  
+8. Mountain Climbers  
+9. Russian Twists  
+10. V-Ups  
+
+### **Obliques**
+11. Side Plank  
+12. Side Crunches  
+13. Twisting Sit-Ups  
+14. Side Bends  
+15. Hanging Oblique Raises  
+16. Windshield Wipers  
+17. Woodchoppers  
+18. Mason Twists  
+19. Cross-Body Mountain Climbers  
+20. Seated Oblique Twists  
+
+### **Lower Back**
+21. Bird Dog  
+22. Supermans  
+23. Back Extensions  
+24. Good Mornings  
+25. Deadlifts  
+26. Romanian Deadlifts  
+27. Reverse Hyperextensions  
+28. Bridge Exercise  
+29. Cobra Stretch  
+30. Resistance Band Back Extensions  
+
+---
+
+## **Lower Body Exercises**
+
+### **Glutes**
+1. Hip Thrusts  
+2. Glute Bridges  
+3. Bulgarian Split Squats  
+4. Step-Ups  
+5. Donkey Kicks  
+6. Fire Hydrants  
+7. Cable Kickbacks  
+8. Frog Pumps  
+9. Sumo Deadlifts  
+10. Single-Leg Glute Bridges  
+
+### **Quads**
+11. Squats  
+12. Front Squats  
+13. Goblet Squats  
+14. Sissy Squats  
+15. Leg Press  
+16. Bulgarian Split Squats  
+17. Walking Lunges  
+18. Step-Ups  
+19. Hack Squats  
+20. Sled Push  
+
+### **Hamstrings**
+21. Romanian Deadlifts  
+22. Lying Leg Curls  
+23. Seated Leg Curls  
+24. Nordic Hamstring Curls  
+25. Stability Ball Leg Curls  
+26. Good Mornings  
+27. Glute-Ham Raises  
+28. Single-Leg Deadlifts  
+29. Kettlebell Swings  
+30. Cable Pull-Throughs  
+
+### **Calves**
+31. Standing Calf Raises  
+32. Seated Calf Raises  
+33. Donkey Calf Raises  
+34. Calf Press on Leg Press Machine  
+35. Jump Rope  
+36. Box Jumps  
+37. Farmer's Walk on Toes  
+38. Single-Leg Calf Raises  
+39. Stair Climbing  
+40. Explosive Calf Jumps  
+
+---
+
+This layout organizes the exercises clearly for easy use in a fitness app. Let me know if any adjustments are needed!
