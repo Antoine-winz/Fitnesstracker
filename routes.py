@@ -1,6 +1,5 @@
 
 from flask import render_template, request, redirect, url_for, jsonify
-from flask_login import login_required, current_user
 from app import app, db
 from models import Workout, Exercise, Set
 from datetime import datetime
@@ -45,38 +44,28 @@ EXERCISE_LIST = parse_exercise_list()
 import random
 from fitness_tips import TIPS
 
-@app.route('/login')
-def login():
-    if current_user.is_authenticated:
-        return redirect(url_for('index'))
-    return render_template('login.html')
-
 @app.route('/')
-@login_required
 def index():
     tip = random.choice(TIPS)
-    return render_template('index.html', tip=tip, user=current_user)
+    return render_template('index.html', tip=tip)
 
 @app.route('/workout/new', methods=['GET', 'POST'])
-@login_required
 def add_workout():
     if request.method == 'POST':
         workout_name = request.form.get('workout_name')
         if workout_name:
-            workout = Workout(name=workout_name, date=datetime.now(), user=current_user)
+            workout = Workout(name=workout_name, date=datetime.now())
             db.session.add(workout)
             db.session.commit()
             return redirect(url_for('view_workout', workout_id=workout.id))
     return render_template('add_workout.html')
 
 @app.route('/workout/<int:workout_id>')
-@login_required
 def view_workout(workout_id):
-    workout = Workout.query.filter_by(id=workout_id, user=current_user).first_or_404()
+    workout = Workout.query.get_or_404(workout_id)
     return render_template('view_workout.html', workout=workout)
 
 @app.route('/workout/<int:workout_id>/exercise', methods=['POST'])
-@login_required
 def add_exercise(workout_id):
     workout = Workout.query.get_or_404(workout_id)
     exercise_name = request.form.get('exercise_name')
@@ -87,7 +76,6 @@ def add_exercise(workout_id):
     return redirect(url_for('view_workout', workout_id=workout_id))
 
 @app.route('/exercise/<int:exercise_id>/set', methods=['POST'])
-@login_required
 def add_set(exercise_id):
     exercise = Exercise.query.get_or_404(exercise_id)
     reps = request.form.get('reps', type=int)
@@ -175,9 +163,8 @@ def delete_set(set_id):
     return redirect(url_for('view_workout', workout_id=workout_id))
 
 @app.route('/history')
-@login_required
 def history():
-    workouts = Workout.query.filter_by(user=current_user).order_by(Workout.date.desc()).all()
+    workouts = Workout.query.order_by(Workout.date.desc()).all()
     tip = random.choice(TIPS)
     return render_template('history.html', workouts=workouts, tip=tip)
 
