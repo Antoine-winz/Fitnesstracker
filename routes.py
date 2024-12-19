@@ -1,8 +1,9 @@
 
 from flask import render_template, request, redirect, url_for, jsonify
 from app import app, db
-from models import Workout, Exercise, Set
+from models import Workout, Exercise, Set, User
 from datetime import datetime
+from flask_login import login_required, current_user
 
 import re
 
@@ -47,9 +48,12 @@ from fitness_tips import TIPS
 @app.route('/')
 def index():
     tip = random.choice(TIPS)
+    if not current_user.is_authenticated:
+        return render_template('login.html')
     return render_template('index.html', tip=tip)
 
 @app.route('/workout/new', methods=['GET', 'POST'])
+@login_required
 def add_workout():
     if request.method == 'POST':
         workout_name = request.form.get('workout_name')
@@ -61,6 +65,7 @@ def add_workout():
     return render_template('add_workout.html')
 
 @app.route('/workout/<int:workout_id>')
+@login_required
 def view_workout(workout_id):
     workout = Workout.query.get_or_404(workout_id)
     return render_template('view_workout.html', workout=workout)
@@ -163,6 +168,7 @@ def delete_set(set_id):
     return redirect(url_for('view_workout', workout_id=workout_id))
 
 @app.route('/history')
+@login_required
 def history():
     workouts = Workout.query.order_by(Workout.date.desc()).all()
     tip = random.choice(TIPS)
@@ -202,6 +208,7 @@ def rename_workout(workout_id):
     return redirect(url_for('history'))
 
 @app.route('/progress')
+@login_required
 def progress():
     try:
         exercises = Exercise.query.with_entities(Exercise.name).distinct().all()
