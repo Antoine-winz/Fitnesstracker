@@ -118,16 +118,34 @@ def callback():
         else:
             return "User email not available or not verified by Google.", 400
 
-        # Create or get user
-        user = User.query.filter_by(email=users_email).first()
-        if not user:
-            user = User(username=users_name, email=users_email)
-            db.session.add(user)
-            db.session.commit()
-
-        # Log in the user
-        login_user(user)
-        return redirect(url_for("index"))
+        # Create or get user with proper error handling
+        try:
+            user = User.query.filter_by(email=users_email).first()
+            if not user:
+                # Create new user profile
+                user = User(
+                    username=users_name,
+                    email=users_email
+                )
+                db.session.add(user)
+                db.session.commit()
+                print(f"Created new user: {users_email}")
+            
+            # Ensure user exists before login
+            if user is None:
+                raise Exception("Failed to create/retrieve user")
+            
+            # Log in the user and create session
+            login_user(user)
+            print(f"Successfully logged in user: {users_email}")
+            
+            # Redirect to index page
+            return redirect(url_for('index'))
+            
+        except Exception as e:
+            print(f"Error creating/logging in user: {str(e)}")
+            db.session.rollback()
+            return "Failed to create user profile. Please try again.", 500
     except Exception as e:
         print(f"Error in callback route: {str(e)}")
         return "Failed to process Google login callback. Please try again.", 500

@@ -1,17 +1,42 @@
 {% extends "base.html" %}
 
 {% block content %}
-<div class="text-center py-5">
-    <h1 class="display-4">Welcome to Workout Tracker</h1>
-    <p class="lead">Track your workouts, sets, reps, and progress</p>
-    <div class="mt-4">
-        <a href="{{ url_for('add_workout') }}" class="btn btn-primary btn-lg">Start New Workout</a>
-        <a href="{{ url_for('history') }}" class="btn btn-secondary btn-lg ms-2">View History</a>
-    </div>
-    <div class="tip-container mt-5">
-        <div class="tip-box">
-            <p class="tip-text"><strong>Tip:</strong> {{ tip }}</p>
+<div class="py-5">
+    {% if current_user.is_authenticated %}
+        <div class="text-center mb-5">
+            <h1 class="display-4">Welcome back, {{ current_user.username }}!</h1>
+            <p class="lead">Ready to continue your fitness journey?</p>
         </div>
-    </div>
+        
+        <div class="row justify-content-center">
+            <div class="col-md-8">
+                <div class="card shadow-sm mb-4">
+                    <div class="card-body">
+                        <h2 class="card-title h4">Quick Actions</h2>
+                        <div class="d-grid gap-2 d-sm-flex">
+                            <a href="{{ url_for('add_workout') }}" class="btn btn-primary">Start New Workout</a>
+                            <a href="{{ url_for('history') }}" class="btn btn-outline-secondary">View History</a>
+                            <a href="{{ url_for('progress') }}" class="btn btn-outline-info">Check Progress</a>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card shadow-sm">
+                    <div class="card-body">
+                        <h2 class="card-title h4">Today's Tip</h2>
+                        <p class="card-text"><em>{{ tip }}</em></p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    {% else %}
+        <div class="text-center">
+            <h1 class="display-4">Welcome to Workout Tracker</h1>
+            <p class="lead">Track your workouts, sets, reps, and progress</p>
+            <div class="mt-4">
+                <a href="{{ url_for('google_auth.login') }}" class="btn btn-primary btn-lg">Sign in with Google</a>
+            </div>
+        </div>
+    {% endif %}
 </div>
 {% endblock %}
