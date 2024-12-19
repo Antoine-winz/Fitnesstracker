@@ -8,58 +8,52 @@ from oauthlib.oauth2 import WebApplicationClient
 # Import models and db after blueprint creation to avoid circular imports
 google_auth = Blueprint("google_auth", __name__)
 
-try:
-    GOOGLE_CLIENT_ID = os.environ["GOOGLE_OAUTH_CLIENT_ID"]
-    GOOGLE_CLIENT_SECRET = os.environ["GOOGLE_OAUTH_CLIENT_SECRET"]
-except KeyError as e:
-    print(f"Missing required environment variable: {e}")
-    print("Please set up Google OAuth credentials in your Repl's Secrets tab")
-    GOOGLE_CLIENT_ID = None
-    GOOGLE_CLIENT_SECRET = None
-
+# Initialize OAuth 2 client
 GOOGLE_DISCOVERY_URL = "https://accounts.google.com/.well-known/openid-configuration"
 
+def get_google_provider_cfg():
+    return requests.get(GOOGLE_DISCOVERY_URL).json()
+
 def get_google_client():
-    if not GOOGLE_CLIENT_ID:
+    client_id = os.environ.get("GOOGLE_OAUTH_CLIENT_ID")
+    if not client_id:
         raise RuntimeError(
             "Google OAuth credentials not configured. "
             "Please set GOOGLE_OAUTH_CLIENT_ID and GOOGLE_OAUTH_CLIENT_SECRET "
             "in your Repl's Secrets tab."
         )
-    return WebApplicationClient(GOOGLE_CLIENT_ID)
+    return WebApplicationClient(client_id)
 
-client = None
-if GOOGLE_CLIENT_ID:
-    client = get_google_client()
-
-# Get the appropriate callback URL based on environment
 def get_callback_url():
     if os.environ.get('REPLIT_DEV_DOMAIN'):
         domain = os.environ.get('REPLIT_DEV_DOMAIN')
     else:
-        # Fallback to request.host_url for deployment
-        domain = request.host.replace('http://', '').replace('https://', '')
+        domain = request.host
     return f"https://{domain}/google_login/callback"
 
 # Print setup instructions
+callback_url = get_callback_url()
 print(f"""To make Google authentication work:
 1. Go to https://console.cloud.google.com/apis/credentials
 2. Create a new OAuth 2.0 Client ID
-3. Add {get_callback_url()} to Authorized redirect URIs
+3. Add {callback_url} to Authorized redirect URIs
 4. Set GOOGLE_OAUTH_CLIENT_ID and GOOGLE_OAUTH_CLIENT_SECRET in your Repl's Secrets tab""")
 
 @google_auth.route("/google_login")
 def login():
     try:
-        if not client:
-            client = get_google_client()
-        
-        google_provider_cfg = requests.get(GOOGLE_DISCOVERY_URL).json()
+        # Get Google provider configuration
+        google_provider_cfg = get_google_provider_cfg()
         authorization_endpoint = google_provider_cfg["authorization_endpoint"]
         
+        # Get the callback URL
         callback_url = get_callback_url()
         print(f"OAuth Debug - Callback URL: {callback_url}")
         
+        # Create OAuth 2 client
+        client = get_google_client()
+        
+        # Prepare the request URI
         request_uri = client.prepare_request_uri(
             authorization_endpoint,
             redirect_uri=callback_url,
@@ -77,57 +71,61 @@ def callback():
         from app import db
         from models import User
 
-        if not client:
-            client = get_google_client()
-
+        # Get authorization code from Google
         code = request.args.get("code")
         if not code:
             return "Authorization code not received from Google", 400
 
-        google_provider_cfg = requests.get(GOOGLE_DISCOVERY_URL).json()
+        # Get Google provider configuration
+        google_provider_cfg = get_google_provider_cfg()
         token_endpoint = google_provider_cfg["token_endpoint"]
         
+        # Get the callback URL
         callback_url = get_callback_url()
         
-        # Ensure the authorization response URL uses HTTPS
-        full_callback_url = request.url
-        if full_callback_url.startswith('http://'):
-            full_callback_url = full_callback_url.replace('http://', 'https://', 1)
+        # Create OAuth 2 client
+        client = get_google_client()
         
-        print(f"OAuth Debug - Processing callback with URL: {full_callback_url}")
-        
+        # Prepare and send token request
         token_url, headers, body = client.prepare_token_request(
             token_endpoint,
-            authorization_response=full_callback_url,
+            authorization_response=request.url.replace('http://', 'https://'),
             redirect_url=callback_url,
             code=code,
         )
+        
         token_response = requests.post(
             token_url,
             headers=headers,
             data=body,
-            auth=(GOOGLE_CLIENT_ID, GOOGLE_CLIENT_SECRET),
+            auth=(os.environ.get("GOOGLE_OAUTH_CLIENT_ID"), 
+                  os.environ.get("GOOGLE_OAUTH_CLIENT_SECRET")),
         )
 
+        # Parse the token response
         client.parse_request_body_response(json.dumps(token_response.json()))
 
+        # Get user info from Google
         userinfo_endpoint = google_provider_cfg["userinfo_endpoint"]
         uri, headers, body = client.add_token(userinfo_endpoint)
         userinfo_response = requests.get(uri, headers=headers, data=body)
 
+        # Verify the user info
         userinfo = userinfo_response.json()
         if userinfo.get("email_verified"):
             users_email = userinfo["email"]
-            users_name = userinfo["given_name"]
+            users_name = userinfo.get("given_name", users_email.split("@")[0])
         else:
             return "User email not available or not verified by Google.", 400
 
+        # Create or get user
         user = User.query.filter_by(email=users_email).first()
         if not user:
             user = User(username=users_name, email=users_email)
             db.session.add(user)
             db.session.commit()
 
+        # Log in the user
         login_user(user)
         return redirect(url_for("index"))
     except Exception as e:
