@@ -49,9 +49,15 @@ from fitness_tips import TIPS
 @app.route('/index')
 def index():
     if not current_user.is_authenticated:
-        return render_template('login.html')
+        return redirect(url_for('login_page'))
     tip = random.choice(TIPS)
     return render_template('index.html', tip=tip)
+
+@app.route('/login')
+def login_page():
+    if current_user.is_authenticated:
+        return redirect(url_for('index'))
+    return render_template('login.html')
 
 @app.route('/workout/new', methods=['GET', 'POST'])
 @login_required
