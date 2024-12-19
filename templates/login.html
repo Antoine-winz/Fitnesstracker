@@ -1,0 +1,20 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container">
+    <div class="row justify-content-center">
+        <div class="col-md-6 text-center">
+            <div class="card mt-5">
+                <div class="card-body">
+                    <h2 class="card-title mb-4">Welcome to Workout Tracker</h2>
+                    <p class="mb-4">Track your fitness journey with our comprehensive workout tracking system.</p>
+                    <a href="{{ url_for('google_auth.login') }}" class="btn btn-primary btn-lg">
+                        <img src="{{ url_for('static', filename='img/google.svg') }}" alt="Google Logo" class="me-2" style="height: 24px;">
+                        Sign in with Google
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
