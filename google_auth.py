@@ -2,7 +2,7 @@ import json
 import os
 import requests
 from flask import Blueprint, redirect, request, url_for
-from flask_login import login_required, login_user, logout_user
+from flask_login import login_required, login_user, logout_user, current_user
 from oauthlib.oauth2 import WebApplicationClient
 
 # Import models and db after blueprint creation to avoid circular imports
@@ -83,81 +83,83 @@ def callback():
         # Get authorization code from Google
         code = request.args.get("code")
         if not code:
+            print("OAuth Error - No authorization code received")
             return "Authorization code not received from Google", 400
 
         # Get Google provider configuration
         google_provider_cfg = get_google_provider_cfg()
         token_endpoint = google_provider_cfg["token_endpoint"]
         
-        # Get the callback URL
+        # Create OAuth 2 client and get callback URL
+        client = get_google_client()
         callback_url = get_callback_url()
         
-        # Create OAuth 2 client
-        client = get_google_client()
+        print(f"OAuth Debug - Processing callback with code: {code[:10]}...")
         
-        # Prepare and send token request
+        # Prepare token request
         token_url, headers, body = client.prepare_token_request(
             token_endpoint,
             authorization_response=request.url.replace('http://', 'https://'),
             redirect_url=callback_url,
-            code=code,
+            code=code
         )
-        
+
+        # Get access token
         token_response = requests.post(
             token_url,
             headers=headers,
             data=body,
             auth=(os.environ.get("GOOGLE_OAUTH_CLIENT_ID"), 
-                  os.environ.get("GOOGLE_OAUTH_CLIENT_SECRET")),
+                  os.environ.get("GOOGLE_OAUTH_CLIENT_SECRET"))
         )
 
-        # Parse the token response
+        if not token_response.ok:
+            print(f"OAuth Error - Token request failed: {token_response.text}")
+            return "Failed to get access token from Google", 500
+
+        # Parse token response
         client.parse_request_body_response(json.dumps(token_response.json()))
 
-        # Get user info from Google
+        # Get user info
         userinfo_endpoint = google_provider_cfg["userinfo_endpoint"]
         uri, headers, body = client.add_token(userinfo_endpoint)
         userinfo_response = requests.get(uri, headers=headers, data=body)
 
-        # Verify the user info
-        userinfo = userinfo_response.json()
-        if userinfo.get("email_verified"):
-            users_email = userinfo["email"]
-            users_name = userinfo.get("given_name", users_email.split("@")[0])
-        else:
-            return "User email not available or not verified by Google.", 400
+        if not userinfo_response.ok:
+            print(f"OAuth Error - User info request failed: {userinfo_response.text}")
+            return "Failed to get user info from Google", 500
 
-        # Create or get user with proper error handling
+        userinfo = userinfo_response.json()
+        if not userinfo.get("email_verified"):
+            print("OAuth Error - Email not verified")
+            return "User email not verified by Google.", 400
+
+        users_email = userinfo["email"]
+        users_name = userinfo.get("given_name", users_email.split("@")[0])
+        print(f"OAuth Debug - Retrieved user info for: {users_email}")
+
+        # Create or get user
         try:
             user = User.query.filter_by(email=users_email).first()
             if not user:
-                # Create new user profile
-                user = User(
-                    username=users_name,
-                    email=users_email
-                )
+                user = User(username=users_name, email=users_email)
                 db.session.add(user)
-                try:
-                    db.session.commit()
-                    print(f"Created new user: {users_email}")
-                except Exception as e:
-                    print(f"Error creating user: {str(e)}")
-                    db.session.rollback()
-                    return "Failed to create user profile", 500
+                db.session.commit()
+                print(f"OAuth Debug - Created new user: {users_email}")
             
-            # Log in the user
+            # Log in user and redirect
             login_user(user)
-            print(f"Successfully logged in user: {users_email}")
-            
-            # Explicitly return to the index route
-            return redirect(url_for('index', _external=True))
+            print(f"OAuth Debug - Successfully logged in user: {users_email}")
+            return redirect(url_for('index', _external=True, _scheme='https'))
             
         except Exception as e:
-            print(f"Error in user creation/login: {str(e)}")
-            return "Authentication failed. Please try again.", 500
+            db.session.rollback()
+            print(f"Database Error - Failed to handle user: {str(e)}")
+            return "Failed to create or update user profile", 500
+
     except Exception as e:
-        print(f"Error in callback route: {str(e)}")
-        return "Failed to process Google login callback. Please try again.", 500
+        print(f"OAuth Error - Callback failed: {str(e)}")
+        return "Failed to process Google login callback", 500
 
 @google_auth.route("/logout")
 @login_required
