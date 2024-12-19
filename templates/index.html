@@ -21,6 +21,28 @@
                     </div>
                 </div>
 
+                {% if recent_workouts %}
+                <div class="card shadow-sm mb-4">
+                    <div class="card-body">
+                        <h2 class="card-title h4">Recent Workouts</h2>
+                        <div class="list-group">
+                            {% for workout in recent_workouts %}
+                            <a href="{{ url_for('view_workout', workout_id=workout.id) }}" 
+                               class="list-group-item list-group-item-action">
+                                <div class="d-flex w-100 justify-content-between">
+                                    <h5 class="mb-1">{{ workout.name }}</h5>
+                                    <small>{{ workout.date.strftime('%Y-%m-%d') }}</small>
+                                </div>
+                                {% if workout.exercises %}
+                                <small>{{ workout.exercises|length }} exercises</small>
+                                {% endif %}
+                            </a>
+                            {% endfor %}
+                        </div>
+                    </div>
+                </div>
+                {% endif %}
+
                 <div class="card shadow-sm">
                     <div class="card-body">
                         <h2 class="card-title h4">Today's Tip</h2>

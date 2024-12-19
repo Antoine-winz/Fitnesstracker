@@ -53,7 +53,12 @@ def index():
     
     # Show different content for authenticated vs non-authenticated users
     if current_user.is_authenticated:
-        return render_template('index.html', tip=tip)
+        # Get user's recent workouts
+        recent_workouts = Workout.query.filter_by(user_id=current_user.id)\
+            .order_by(Workout.date.desc())\
+            .limit(5)\
+            .all()
+        return render_template('index.html', tip=tip, recent_workouts=recent_workouts)
     else:
         return render_template('login.html')
 
@@ -63,7 +68,11 @@ def add_workout():
     if request.method == 'POST':
         workout_name = request.form.get('workout_name')
         if workout_name:
-            workout = Workout(name=workout_name, date=datetime.now())
+            workout = Workout(
+                name=workout_name,
+                date=datetime.now(),
+                user_id=current_user.id
+            )
             db.session.add(workout)
             db.session.commit()
             return redirect(url_for('view_workout', workout_id=workout.id))
