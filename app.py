@@ -9,6 +9,25 @@ app = Flask(__name__)
 
 # Configure app
 app.secret_key = os.environ.get("FLASK_SECRET_KEY") or os.urandom(24)
+
+# Get the Replit domain and port
+replit_domain = os.environ.get("REPLIT_DEV_DOMAIN")
+server_port = os.environ.get("PORT", "3000")
+
+if not replit_domain:
+    print("Warning: REPLIT_DEV_DOMAIN not set. Some features may not work correctly.")
+else:
+    print(f"Configuring application for domain: {replit_domain}")
+
+# Get the Replit domain and port
+replit_domain = os.environ.get("REPLIT_DEV_DOMAIN")
+server_port = os.environ.get("PORT", "3000")
+
+if not replit_domain:
+    print("Warning: REPLIT_DEV_DOMAIN not set. Some features may not work correctly.")
+else:
+    print(f"Configuring application for domain: {replit_domain}")
+
 app.config.update(
     SQLALCHEMY_DATABASE_URI=os.environ.get("DATABASE_URL"),
     SQLALCHEMY_ENGINE_OPTIONS={
@@ -20,12 +39,13 @@ app.config.update(
     SESSION_COOKIE_SAMESITE="Lax",
     REMEMBER_COOKIE_SECURE=True,
     REMEMBER_COOKIE_HTTPONLY=True,
-    PREFERRED_URL_SCHEME="https"  # Force HTTPS for URL generation
+    PREFERRED_URL_SCHEME="https",  # Force HTTPS for URL generation
+    SERVER_NAME=replit_domain if replit_domain else None,  # Required for URL generation
 )
 
-# Ensure HTTPS for all redirects
-if os.environ.get("REPLIT_DEV_DOMAIN"):
-    app.config["SERVER_NAME"] = os.environ.get("REPLIT_DEV_DOMAIN")
+# Enable request forwarding
+from werkzeug.middleware.proxy_fix import ProxyFix
+app.wsgi_app = ProxyFix(app.wsgi_app, x_proto=1, x_host=1)
 
 # Initialize SQLAlchemy with custom base
 class Base(DeclarativeBase):
