@@ -32,10 +32,9 @@ def get_callback_url():
             "REPLIT_DEV_DOMAIN environment variable is not set. "
             "Please ensure you are running this on Replit."
         )
-    # Build the callback URL with the exact domain - no trailing slash
+    # Build the callback URL with the exact domain
     callback_url = f"https://{domain}/google_login/callback"
 
-    # Print the exact URL that needs to be configured
     print("\n" + "="*80)
     print("IMPORTANT: Configure this EXACT URL in Google Cloud Console")
     print("="*80)
@@ -45,8 +44,12 @@ def get_callback_url():
     print("2. Click on your OAuth 2.0 Client ID")
     print("3. Add the above URL to 'Authorized redirect URIs'")
     print("4. Click Save and wait 5-10 minutes for changes to take effect")
+    print("\nNOTE: The callback URL must match EXACTLY, including:")
+    print("- No trailing slash")
+    print("- Correct protocol (https://)")
+    print("- Exact domain name")
     print("="*80)
-    return callback_url
+    return callback_url.rstrip('/')  # Ensure no trailing slash
 
 # Print setup instructions
 print("""To make Google authentication work:
@@ -82,6 +85,7 @@ def login():
         client = get_google_client()
 
         print(f"Initiating Google OAuth flow with callback URL: {callback_url}")
+        
         # Prepare the request URI with explicit parameters
         request_uri = client.prepare_request_uri(
             authorization_endpoint,
@@ -91,7 +95,9 @@ def login():
             prompt="consent"
         )
 
-        print(f"Initiating Google OAuth flow with callback URL: {callback_url}")
+        # Log the authorization URL for debugging
+        print(f"Authorization URL: {request_uri}")
+        
         return redirect(request_uri)
     except requests.exceptions.RequestException as e:
         print(f"OAuth Error - Network error: {str(e)}")
@@ -146,14 +152,20 @@ def callback():
         client = get_google_client()
 
         print(f"Processing OAuth callback with code: {code[:5]}...")
+        print(f"Full callback URL: {request.url}")
 
         # Prepare token request with the correct callback URL
+        # Ensure we're using HTTPS for the authorization response URL
+        authorization_response = request.url.replace('http://', 'https://')
         token_url, headers, body = client.prepare_token_request(
             token_endpoint,
-            authorization_response=request.url,
+            authorization_response=authorization_response,
             redirect_url=callback_url,
             code=code
         )
+
+        print(f"Token URL: {token_url}")
+        print(f"Callback URL used: {callback_url}")
 
         # Get access token
         client_id = os.environ.get("GOOGLE_OAUTH_CLIENT_ID")
@@ -172,7 +184,9 @@ def callback():
 
         # Check token response
         if not token_response.ok:
-            return "Failed to get access token from Google", 500
+            error_msg = token_response.text
+            print(f"OAuth Error - Token response failed: {error_msg}")
+            return f"Failed to get access token from Google: {error_msg}", 500
 
         # Parse token response
         client.parse_request_body_response(json.dumps(token_response.json()))
@@ -183,7 +197,9 @@ def callback():
         userinfo_response = requests.get(uri, headers=headers, data=body)
 
         if not userinfo_response.ok:
-            return "Failed to get user info from Google", 500
+            error_msg = userinfo_response.text
+            print(f"OAuth Error - User info failed: {error_msg}")
+            return f"Failed to get user info from Google: {error_msg}", 500
 
         # Verify user info
         userinfo = userinfo_response.json()
@@ -194,18 +210,35 @@ def callback():
         users_email = userinfo["email"]
         users_name = userinfo.get("given_name", users_email.split("@")[0])
 
+        print(f"Successfully authenticated user: {users_email}")
+
         # Create or update user
         user = User.query.filter_by(email=users_email).first()
         if not user:
             user = User(username=users_name, email=users_email)
             db.session.add(user)
             db.session.commit()
+            print(f"Created new user: {users_email}")
+        else:
+            print(f"Found existing user: {users_email}")
 
         # Log in user
         login_user(user)
+        print(f"User logged in successfully: {users_email}")
 
-        # Redirect to index page with explicit HTTPS scheme
-        return redirect(url_for('index', _external=True, _scheme='https'))
+        # Redirect to home page
+        try:
+            target_url = url_for('index', _external=True, _scheme='https')
+            print(f"Redirecting to: {target_url}")
+            return redirect(target_url)
+        except Exception as e:
+            print(f"Error generating redirect URL: {str(e)}")
+            print("Using fallback redirect to root URL")
+            return redirect('/')
+
+    except Exception as e:
+        print(f"OAuth Error - Callback failed: {str(e)}")
+        return f"Failed to process Google login callback: {str(e)}", 500
 
     except Exception as e:
         print(f"OAuth Error - Callback failed: {str(e)}")

@@ -19,20 +19,26 @@ if not replit_domain:
 else:
     print(f"Configuring application for domain: {replit_domain}")
 
+# Configure SQLAlchemy and session settings
 app.config.update(
     SQLALCHEMY_DATABASE_URI=os.environ.get("DATABASE_URL"),
     SQLALCHEMY_ENGINE_OPTIONS={
         "pool_recycle": 300,
         "pool_pre_ping": True,
     },
+    # Security settings
     SESSION_COOKIE_SECURE=True,
     SESSION_COOKIE_HTTPONLY=True,
     SESSION_COOKIE_SAMESITE="Lax",
     REMEMBER_COOKIE_SECURE=True,
     REMEMBER_COOKIE_HTTPONLY=True,
-    PREFERRED_URL_SCHEME="https",  # Force HTTPS for URL generation
-    SERVER_NAME=replit_domain,  # Required for URL generation
+    # HTTPS and domain configuration
+    PREFERRED_URL_SCHEME="https",
 )
+
+# Only set SERVER_NAME if we have a domain
+if replit_domain:
+    app.config['SERVER_NAME'] = replit_domain
 
 print(f"\nConfigured server name: {replit_domain}")
 print(f"Make sure this matches your Google OAuth Callback URL domain exactly")
@@ -41,9 +47,19 @@ print(f"Make sure this matches your Google OAuth Callback URL domain exactly")
 if not app.debug:
     app.config['SESSION_COOKIE_SECURE'] = True
 
-# Enable request forwarding
+# Enable request forwarding with proper HTTPS handling
 from werkzeug.middleware.proxy_fix import ProxyFix
-app.wsgi_app = ProxyFix(app.wsgi_app, x_proto=1, x_host=1)
+app.wsgi_app = ProxyFix(
+    app.wsgi_app,
+    x_proto=1,  # Number of proxy servers setting the X-Forwarded-Proto header
+    x_host=1,   # Number of proxy servers setting the X-Forwarded-Host header
+    x_port=1,   # Number of proxy servers setting the X-Forwarded-Port header
+    x_prefix=1, # Number of proxy servers setting the X-Forwarded-Prefix header
+    x_for=1     # Number of proxy servers setting the X-Forwarded-For header
+)
+
+# Ensure all redirects use HTTPS
+app.config['PREFERRED_URL_SCHEME'] = 'https'
 
 # Initialize SQLAlchemy with custom base
 class Base(DeclarativeBase):
