@@ -12,5 +12,6 @@ if __name__ == '__main__':
     app.run(
         host='0.0.0.0',  # Required to accept external connections
         port=server_port,
-        debug=True
+        debug=True,
+        ssl_context=None  # Let Replit handle HTTPS
     )

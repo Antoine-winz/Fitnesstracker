@@ -32,36 +32,20 @@ def get_callback_url():
             "REPLIT_DEV_DOMAIN environment variable is not set. "
             "Please ensure you are running this on Replit."
         )
-    # Build the callback URL with the exact domain
+    # Build the callback URL with the exact domain - no trailing slash
     callback_url = f"https://{domain}/google_login/callback"
-    
-    print("\n" + "*"*100)
-    print("CRITICAL: YOU MUST ADD THIS EXACT URL TO GOOGLE CLOUD CONSOLE")
-    print("*"*100)
-    print(f"\nCallback URL to add: {callback_url}")
-    print("\nFollow these steps:")
-    print("1. Go to Google Cloud Console: https://console.cloud.google.com/apis/credentials")
-    print("2. Find and edit your OAuth 2.0 Client ID")
-    print("3. In 'Authorized redirect URIs' section, click '+ ADD URI'")
-    print("4. Paste the exact URL shown above (including https:// and no trailing slash)")
-    print("5. Click 'SAVE' at the bottom")
-    print("6. Wait 5-10 minutes for Google's settings to update")
-    print("\nNOTE: The URL must match EXACTLY as shown above")
-    print("*"*100 + "\n")
-    
-    # Print setup instructions with highlighted callback URL
+
+    # Print the exact URL that needs to be configured
     print("\n" + "="*80)
     print("IMPORTANT: Configure this EXACT URL in Google Cloud Console")
     print("="*80)
     print(f"\nCallback URL: {callback_url}")
     print("\nSteps to configure:")
     print("1. Go to https://console.cloud.google.com/apis/credentials")
-    print("2. Click on your OAuth 2.0 Client ID or create a new one")
+    print("2. Click on your OAuth 2.0 Client ID")
     print("3. Add the above URL to 'Authorized redirect URIs'")
-    print("4. Click Save")
-    print("5. Wait 5-10 minutes for Google's settings to update")
-    print("\nNote: The URL must match EXACTLY, including https:// and no trailing slash")
-    print("="*80 + "\n")
+    print("4. Click Save and wait 5-10 minutes for changes to take effect")
+    print("="*80)
     return callback_url
 
 # Print setup instructions
@@ -90,13 +74,14 @@ def login():
         # Get Google provider configuration
         google_provider_cfg = get_google_provider_cfg()
         authorization_endpoint = google_provider_cfg["authorization_endpoint"]
-        
+
         # Get the callback URL and print setup instructions
         callback_url = get_callback_url()
-        
+
         # Create OAuth 2 client
         client = get_google_client()
-        
+
+        print(f"Initiating Google OAuth flow with callback URL: {callback_url}")
         # Prepare the request URI with explicit parameters
         request_uri = client.prepare_request_uri(
             authorization_endpoint,
@@ -105,7 +90,7 @@ def login():
             access_type="offline",
             prompt="consent"
         )
-        
+
         print(f"Initiating Google OAuth flow with callback URL: {callback_url}")
         return redirect(request_uri)
     except requests.exceptions.RequestException as e:
@@ -115,16 +100,28 @@ def login():
         error_msg = str(e)
         print(f"OAuth Error - Login failed: {error_msg}")
         if "redirect_uri_mismatch" in error_msg.lower():
-            callback_url = get_callback_url()  # Get the exact callback URL
-            return f"""
-                Error: The callback URL is not properly configured. Please:
-                1. Go to Google Cloud Console: https://console.cloud.google.com/apis/credentials
-                2. Find and edit your OAuth 2.0 Client ID
-                3. Add this EXACT URL to 'Authorized redirect URIs': {callback_url}
-                4. Click 'SAVE' at the bottom
-                5. Wait 5-10 minutes for Google's settings to update
-                6. Try logging in again
-            """, 500
+                callback_url = get_callback_url()  # Get the exact callback URL
+                return f"""
+                    <html>
+                    <body style="font-family: Arial, sans-serif; max-width: 800px; margin: 40px auto; padding: 20px;">
+                        <h2 style="color: #d32f2f;">Error: Callback URL Mismatch</h2>
+                        <p>The callback URL is not properly configured in Google Cloud Console.</p>
+                        <div style="background: #f5f5f5; padding: 20px; border-radius: 4px; margin: 20px 0;">
+                            <strong>Required Callback URL:</strong><br>
+                            <code style="background: #fff; padding: 10px; display: block; margin: 10px 0;">{callback_url}</code>
+                        </div>
+                        <h3>Steps to fix:</h3>
+                        <ol>
+                            <li>Go to <a href="https://console.cloud.google.com/apis/credentials" target="_blank">Google Cloud Console</a></li>
+                            <li>Find and edit your OAuth 2.0 Client ID</li>
+                            <li>In 'Authorized redirect URIs', add the exact URL shown above</li>
+                            <li>Click 'SAVE' at the bottom</li>
+                            <li>Wait 5-10 minutes for Google's settings to update</li>
+                            <li><a href="/google_login">Try logging in again</a></li>
+                        </ol>
+                    </body>
+                    </html>
+                """, 500
         return "An error occurred during login. Please check the application logs.", 500
 
 @google_auth.route("/google_login/callback")
@@ -137,20 +134,23 @@ def callback():
         # Get authorization code from Google
         code = request.args.get("code")
         if not code:
+            print("OAuth Error - No authorization code received")
             return "Authorization code not received from Google", 400
 
         # Get Google provider configuration
         google_provider_cfg = get_google_provider_cfg()
         token_endpoint = google_provider_cfg["token_endpoint"]
-        
+
         # Get callback URL and client
         callback_url = get_callback_url()
         client = get_google_client()
-        
-        # Prepare token request
+
+        print(f"Processing OAuth callback with code: {code[:5]}...")
+
+        # Prepare token request with the correct callback URL
         token_url, headers, body = client.prepare_token_request(
             token_endpoint,
-            authorization_response=request.url.replace('http://', 'https://'),
+            authorization_response=request.url,
             redirect_url=callback_url,
             code=code
         )
@@ -158,11 +158,11 @@ def callback():
         # Get access token
         client_id = os.environ.get("GOOGLE_OAUTH_CLIENT_ID")
         client_secret = os.environ.get("GOOGLE_OAUTH_CLIENT_SECRET")
-        
+
         if not client_id or not client_secret:
             print("OAuth Error - Missing client credentials")
             return "Missing OAuth credentials", 500
-            
+
         token_response = requests.post(
             token_url,
             headers=headers,
@@ -203,8 +203,8 @@ def callback():
 
         # Log in user
         login_user(user)
-        
-        # Redirect to index page
+
+        # Redirect to index page with explicit HTTPS scheme
         return redirect(url_for('index', _external=True, _scheme='https'))
 
     except Exception as e:

@@ -19,15 +19,6 @@ if not replit_domain:
 else:
     print(f"Configuring application for domain: {replit_domain}")
 
-# Get the Replit domain and port
-replit_domain = os.environ.get("REPLIT_DEV_DOMAIN")
-server_port = os.environ.get("PORT", "3000")
-
-if not replit_domain:
-    print("Warning: REPLIT_DEV_DOMAIN not set. Some features may not work correctly.")
-else:
-    print(f"Configuring application for domain: {replit_domain}")
-
 app.config.update(
     SQLALCHEMY_DATABASE_URI=os.environ.get("DATABASE_URL"),
     SQLALCHEMY_ENGINE_OPTIONS={
@@ -40,8 +31,15 @@ app.config.update(
     REMEMBER_COOKIE_SECURE=True,
     REMEMBER_COOKIE_HTTPONLY=True,
     PREFERRED_URL_SCHEME="https",  # Force HTTPS for URL generation
-    SERVER_NAME=replit_domain if replit_domain else None,  # Required for URL generation
+    SERVER_NAME=replit_domain,  # Required for URL generation
 )
+
+print(f"\nConfigured server name: {replit_domain}")
+print(f"Make sure this matches your Google OAuth Callback URL domain exactly")
+
+# Ensure the application can handle both HTTP and HTTPS
+if not app.debug:
+    app.config['SESSION_COOKIE_SECURE'] = True
 
 # Enable request forwarding
 from werkzeug.middleware.proxy_fix import ProxyFix
