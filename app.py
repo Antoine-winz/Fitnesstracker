@@ -24,8 +24,6 @@ app.config.update(
     REMEMBER_COOKIE_SECURE=True,
     REMEMBER_COOKIE_HTTPONLY=True,
     PERMANENT_SESSION_LIFETIME=1800,  # 30 minutes
-    # HTTPS configuration
-    PREFERRED_URL_SCHEME='https'
 )
 
 # Configure proper proxy handling
@@ -57,13 +55,25 @@ def load_user(user_id):
     from models import User
     try:
         return User.query.get(int(user_id))
-    except:
+    except Exception as e:
+        print(f"Error loading user: {str(e)}")
         return None
+
+# Setup logging
+import logging
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger('werkzeug')
+logger.setLevel(logging.INFO)
 
 # Register blueprints and create tables
 with app.app_context():
-    from models import User
-    import routes
-    from google_auth import google_auth
-    app.register_blueprint(google_auth)
-    db.create_all()
+    try:
+        from models import User
+        import routes
+        from google_auth import google_auth
+        app.register_blueprint(google_auth)
+        db.create_all()
+        app.logger.info("Application initialized successfully")
+    except Exception as e:
+        app.logger.error(f"Error during initialization: {str(e)}")
+        raise
