@@ -10,15 +10,6 @@ app = Flask(__name__)
 # Configure app
 app.secret_key = os.environ.get("FLASK_SECRET_KEY") or os.urandom(24)
 
-# Get the Replit domain and port
-replit_domain = os.environ.get("REPLIT_DEV_DOMAIN")
-server_port = os.environ.get("PORT", "3000")
-
-if not replit_domain:
-    print("Warning: REPLIT_DEV_DOMAIN not set. Some features may not work correctly.")
-else:
-    print(f"Configuring application for domain: {replit_domain}")
-
 # Configure SQLAlchemy and session settings
 app.config.update(
     SQLALCHEMY_DATABASE_URI=os.environ.get("DATABASE_URL"),
@@ -29,37 +20,24 @@ app.config.update(
     # Security settings
     SESSION_COOKIE_SECURE=True,
     SESSION_COOKIE_HTTPONLY=True,
-    SESSION_COOKIE_SAMESITE="Lax",
+    SESSION_COOKIE_SAMESITE='Lax',
     REMEMBER_COOKIE_SECURE=True,
     REMEMBER_COOKIE_HTTPONLY=True,
-    # HTTPS and domain configuration
-    PREFERRED_URL_SCHEME="https",
+    PERMANENT_SESSION_LIFETIME=1800,  # 30 minutes
+    # HTTPS configuration
+    PREFERRED_URL_SCHEME='https'
 )
 
-# Only set SERVER_NAME if we have a domain
-if replit_domain:
-    app.config['SERVER_NAME'] = replit_domain
-
-print(f"\nConfigured server name: {replit_domain}")
-print(f"Make sure this matches your Google OAuth Callback URL domain exactly")
-
-# Ensure the application can handle both HTTP and HTTPS
-if not app.debug:
-    app.config['SESSION_COOKIE_SECURE'] = True
-
-# Enable request forwarding with proper HTTPS handling
+# Configure proper proxy handling
 from werkzeug.middleware.proxy_fix import ProxyFix
 app.wsgi_app = ProxyFix(
     app.wsgi_app,
-    x_proto=1,  # Number of proxy servers setting the X-Forwarded-Proto header
-    x_host=1,   # Number of proxy servers setting the X-Forwarded-Host header
-    x_port=1,   # Number of proxy servers setting the X-Forwarded-Port header
-    x_prefix=1, # Number of proxy servers setting the X-Forwarded-Prefix header
-    x_for=1     # Number of proxy servers setting the X-Forwarded-For header
+    x_proto=1,
+    x_host=1,
+    x_prefix=1,
+    x_for=1,
+    x_port=1
 )
-
-# Ensure all redirects use HTTPS
-app.config['PREFERRED_URL_SCHEME'] = 'https'
 
 # Initialize SQLAlchemy with custom base
 class Base(DeclarativeBase):
@@ -84,7 +62,7 @@ def load_user(user_id):
 
 # Register blueprints and create tables
 with app.app_context():
-    import models
+    from models import User
     import routes
     from google_auth import google_auth
     app.register_blueprint(google_auth)
