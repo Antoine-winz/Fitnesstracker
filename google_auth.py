@@ -18,47 +18,33 @@ def get_google_provider_cfg():
         raise
 
 def get_callback_url():
-    domain = os.environ.get("REPLIT_DEV_DOMAIN")
-    if not domain:
-        current_app.logger.error("REPLIT_DEV_DOMAIN not configured")
-        return None
-    callback_url = f"https://{domain}/oauth2callback"
-    current_app.logger.info(f"Generated callback URL: {callback_url}")
-    return callback_url
+    # Don't include port number as Replit handles HTTPS routing
+    domain = "5756e563-39aa-4fad-b854-e0d017300d94-00-pwefu4ofvfrn.janeway.replit.dev"
+    return f"https://{domain}/oauth2callback"
 
 @google_auth.route("/login")
 def login():
     try:
-        # Get Google provider configuration
         google_provider_cfg = get_google_provider_cfg()
         authorization_endpoint = google_provider_cfg["authorization_endpoint"]
 
-        # Initialize client with credentials
         client_id = os.environ.get("GOOGLE_OAUTH_CLIENT_ID")
         if not client_id:
             current_app.logger.error("Google OAuth client ID not configured")
             return "Google OAuth client ID not configured", 500
 
         client = WebApplicationClient(client_id)
-
-        # Get callback URL
         callback_url = get_callback_url()
-        if not callback_url:
-            return "Callback URL configuration error", 500
 
-        # Log the full authorization flow details
-        current_app.logger.info(f"Login initiated from: {request.url}")
-        current_app.logger.info(f"Using callback URL: {callback_url}")
-
-        # Create authorization request URL
         request_uri = client.prepare_request_uri(
             authorization_endpoint,
             redirect_uri=callback_url,
             scope=["openid", "email", "profile"]
         )
 
-        current_app.logger.info(f"Redirecting to Google authorization URL: {request_uri}")
+        current_app.logger.info(f"Starting OAuth flow with callback URL: {callback_url}")
         return redirect(request_uri)
+
     except Exception as e:
         current_app.logger.error(f"Login error: {str(e)}")
         return f"An error occurred during login setup: {str(e)}", 500
@@ -66,46 +52,35 @@ def login():
 @google_auth.route("/oauth2callback")
 def callback():
     try:
-        # Log incoming callback details
-        current_app.logger.info(f"Received callback at URL: {request.url}")
-        current_app.logger.info(f"Query parameters: {request.args}")
-
-        # Get authorization code
         code = request.args.get("code")
         if not code:
-            current_app.logger.error("Authorization code not received")
+            current_app.logger.error("No authorization code received")
             return "Authorization code not received", 400
 
-        # Initialize client
         client_id = os.environ.get("GOOGLE_OAUTH_CLIENT_ID")
         client_secret = os.environ.get("GOOGLE_OAUTH_CLIENT_SECRET")
         if not client_id or not client_secret:
             current_app.logger.error("OAuth credentials not configured")
             return "OAuth credentials not configured", 500
 
-        # Get callback URL
         callback_url = get_callback_url()
-        if not callback_url:
-            return "Callback URL configuration error", 500
 
         client = WebApplicationClient(client_id)
-
-        # Get token endpoint
         google_provider_cfg = get_google_provider_cfg()
         token_endpoint = google_provider_cfg["token_endpoint"]
 
-        # Prepare token request
-        current_app.logger.info(f"Preparing token request with callback URL: {callback_url}")
+        # Ensure we're using HTTPS in the authorization response
+        current_url = request.url
+        if 'http://' in current_url:
+            current_url = current_url.replace('http://', 'https://')
+
         token_url, headers, body = client.prepare_token_request(
             token_endpoint,
-            authorization_response=request.url.replace("http://", "https://"),
+            authorization_response=current_url,
             redirect_url=callback_url,
             code=code
         )
 
-        current_app.logger.info(f"Sending token request to: {token_url}")
-
-        # Exchange code for tokens
         token_response = requests.post(
             token_url,
             headers=headers,
@@ -113,10 +88,8 @@ def callback():
             auth=(client_id, client_secret),
         )
 
-        # Parse token response
         client.parse_request_body_response(json.dumps(token_response.json()))
 
-        # Get user info
         userinfo_endpoint = google_provider_cfg["userinfo_endpoint"]
         uri, headers, body = client.add_token(userinfo_endpoint)
         userinfo_response = requests.get(uri, headers=headers, data=body)
@@ -129,11 +102,9 @@ def callback():
         if not userinfo.get("email_verified"):
             return "User email not verified by Google.", 400
 
-        # Get user info
         users_email = userinfo["email"]
         users_name = userinfo.get("given_name", users_email.split("@")[0])
 
-        # Create or get user
         from app import db
         from models import User
 
@@ -143,7 +114,6 @@ def callback():
             db.session.add(user)
             db.session.commit()
 
-        # Login user
         login_user(user)
         return redirect(url_for('index'))
 
