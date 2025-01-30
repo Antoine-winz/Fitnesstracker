@@ -1,9 +1,7 @@
-
 from flask import render_template, request, redirect, url_for, jsonify
 from app import app, db
-from models import Workout, Exercise, Set, User
+from models import Workout, Exercise, Set
 from datetime import datetime
-from flask_login import login_required, current_user
 
 import re
 
@@ -12,30 +10,39 @@ def parse_exercise_list():
     upper_body = ["Chest", "Back", "Shoulders", "Arms", "Upper Body"]
     core = ["Core", "Abs", "Obliques", "Lower Back"]
     lower_body = ["Legs", "Lower Body", "Glutes", "Calves", "Quads", "Hamstrings"]
-    
+
     current_category = None
-    with open('Pasted-Here-s-the-simplified-list-of-Upper-Body-Core-and-Lower-Body-exercises-categorized-an-1734558777240.txt', 'r') as f:
-        for line in f:
-            line = line.strip()
-            if line.startswith('####') or line.startswith('###'):
-                current_category = line.replace('#', '').replace('*', '').strip()
-            elif re.match(r'^\d+\.', line):
-                exercise_name = re.sub(r'^\d+\.\s*', '', line.strip())
-                if exercise_name:
-                    # Map everything to either Upper Body, Core, or Lower Body
-                    if any(category.lower() in current_category.lower() for category in core):
-                        simplified_category = "Core"
-                    elif any(category.lower() in current_category.lower() for category in lower_body):
-                        simplified_category = "Lower Body"
-                    else:
-                        # Everything else goes to Upper Body
-                        simplified_category = "Upper Body"
-                        
-                    exercises.append({
-                        'name': exercise_name.strip(),
-                        'category': simplified_category
-                    })
-    
+    try:
+        with open('exercises.txt', 'r') as f:
+            for line in f:
+                line = line.strip()
+                if line.startswith('####'):
+                    current_category = line.replace('#', '').replace('*', '').strip()
+                elif re.match(r'^\d+\.', line):
+                    exercise_name = re.sub(r'^\d+\.\s*', '', line.strip())
+                    if exercise_name:
+                        # Map everything to either Upper Body, Core, or Lower Body
+                        if any(category.lower() in current_category.lower() for category in core):
+                            simplified_category = "Core"
+                        elif any(category.lower() in current_category.lower() for category in lower_body):
+                            simplified_category = "Lower Body"
+                        else:
+                            # Everything else goes to Upper Body
+                            simplified_category = "Upper Body"
+
+                        exercises.append({
+                            'name': exercise_name.strip(),
+                            'category': simplified_category
+                        })
+    except FileNotFoundError:
+        # Provide default exercises if file is not found
+        default_exercises = [
+            {'name': 'Push-ups', 'category': 'Upper Body'},
+            {'name': 'Squats', 'category': 'Lower Body'},
+            {'name': 'Crunches', 'category': 'Core'},
+        ]
+        exercises.extend(default_exercises)
+
     # Sort exercises alphabetically within each category
     exercises.sort(key=lambda x: x['name'])
     return exercises
@@ -46,40 +53,22 @@ import random
 from fitness_tips import TIPS
 
 @app.route('/')
-@app.route('/index')
 def index():
-    # Get a random tip
     tip = random.choice(TIPS)
-    
-    # Show different content for authenticated vs non-authenticated users
-    if current_user.is_authenticated:
-        # Get user's recent workouts
-        recent_workouts = Workout.query.filter_by(user_id=current_user.id)\
-            .order_by(Workout.date.desc())\
-            .limit(5)\
-            .all()
-        return render_template('index.html', tip=tip, recent_workouts=recent_workouts)
-    else:
-        return render_template('login.html')
+    return render_template('index.html', tip=tip)
 
 @app.route('/workout/new', methods=['GET', 'POST'])
-@login_required
 def add_workout():
     if request.method == 'POST':
         workout_name = request.form.get('workout_name')
         if workout_name:
-            workout = Workout(
-                name=workout_name,
-                date=datetime.now(),
-                user_id=current_user.id
-            )
+            workout = Workout(name=workout_name, date=datetime.now())
             db.session.add(workout)
             db.session.commit()
             return redirect(url_for('view_workout', workout_id=workout.id))
     return render_template('add_workout.html')
 
 @app.route('/workout/<int:workout_id>')
-@login_required
 def view_workout(workout_id):
     workout = Workout.query.get_or_404(workout_id)
     return render_template('view_workout.html', workout=workout)
@@ -141,12 +130,12 @@ def get_categories():
 def suggest_exercises():
     query = request.args.get('q', '').lower()
     category = request.args.get('category', 'all')
-    
+
     suggestions = []
     for exercise in EXERCISE_LIST:
         name_matches = query in exercise['name'].lower()
         category_matches = category == 'all' or category == exercise['category']
-        
+
         if (name_matches or not query) and category_matches:
             exercise_with_category = {
                 'name': exercise['name'],
@@ -154,7 +143,7 @@ def suggest_exercises():
                 'display': f"{exercise['name']} ({exercise['category']})"
             }
             suggestions.append(exercise_with_category)
-    
+
     return jsonify(suggestions[:20])
 
 @app.route('/exercise/<int:exercise_id>/delete', methods=['POST'])
@@ -182,7 +171,6 @@ def delete_set(set_id):
     return redirect(url_for('view_workout', workout_id=workout_id))
 
 @app.route('/history')
-@login_required
 def history():
     workouts = Workout.query.order_by(Workout.date.desc()).all()
     tip = random.choice(TIPS)
@@ -200,14 +188,14 @@ def duplicate_workout(workout_id):
     original_workout = Workout.query.get_or_404(workout_id)
     new_workout = Workout(name=f"Copy of {original_workout.name}", notes=original_workout.notes)
     db.session.add(new_workout)
-    
+
     for exercise in original_workout.exercises:
         new_exercise = Exercise(name=exercise.name, workout=new_workout)
         db.session.add(new_exercise)
         for set in exercise.sets:
             new_set = Set(reps=set.reps, weight=set.weight, exercise=new_exercise)
             db.session.add(new_set)
-    
+
     db.session.commit()
     return redirect(url_for('view_workout', workout_id=new_workout.id))
 
@@ -222,21 +210,20 @@ def rename_workout(workout_id):
     return redirect(url_for('history'))
 
 @app.route('/progress')
-@login_required
 def progress():
     try:
         exercises = Exercise.query.with_entities(Exercise.name).distinct().all()
         exercise_names = [exercise[0] for exercise in exercises]
-        
+
         categorized_exercises = {}
         for exercise_name in exercise_names:
             matching_exercises = [ex for ex in EXERCISE_LIST if ex['name'] == exercise_name]
             category = matching_exercises[0]['category'] if matching_exercises else 'Other'
-            
+
             if category not in categorized_exercises:
                 categorized_exercises[category] = []
             categorized_exercises[category].append(exercise_name)
-        
+
         return render_template('progress.html', categorized_exercises=categorized_exercises)
     except Exception as e:
         app.logger.error(f"Error in progress page: {str(e)}")
@@ -249,10 +236,10 @@ def exercise_progress(exercise_name):
             .join(Workout)\
             .order_by(Workout.date.desc())\
             .all()
-        
+
         if not exercises:
             return redirect(url_for('index'))
-        
+
         history = []
         for exercise in exercises:
             if exercise.sets:
@@ -266,7 +253,7 @@ def exercise_progress(exercise_name):
                         'volume': float(set.volume)
                     } for set in exercise.sets]
                 })
-        
+
         return render_template('exercise_progress.html',
                              exercise_name=exercise_name,
                              history=history if history else None)
